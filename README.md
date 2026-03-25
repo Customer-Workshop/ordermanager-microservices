@@ -1,53 +1,29 @@
-# Inventory Service Microservice
+# Inventory Microservice
 
-A standalone .NET 8 Web API + Angular 17 microservice responsible for managing product inventory, stock levels, warehouse locations, and reorder alerts. Decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith).
+Standalone inventory management microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────┐
-│           Inventory Service                  │
-│                                              │
-│  ┌──────────┐  ┌────────────┐  ┌──────────┐│
-│  │Controller │→ │  Service   │→ │ EF Core  ││
-│  │  (REST)   │  │  (Logic)   │  │ DbContext ││
-│  └──────────┘  └────────────┘  └──────────┘│
-│       ↑                            ↓        │
-│  ┌──────────┐              ┌──────────────┐ │
-│  │ Angular  │              │   SQLite DB   │ │
-│  │ Frontend │              │ (inventory.db)│ │
-│  └──────────┘              └──────────────┘ │
-└─────────────────────────────────────────────┘
-        ↑                          ↑
-   HTTP clients              Inter-service
-   (browsers)                calls (Order svc)
-```
+| Component | Description |
+|-----------|-------------|
+| **Backend** | .NET 8 Web API with EF Core + SQLite |
+| **Frontend** | Angular 17 standalone components |
+| **Container** | Multi-stage Docker build (Node + .NET SDK + Alpine runtime) |
+| **Orchestration** | Helm chart with HPA, network policies, service monitor |
+| **GitOps** | ArgoCD application manifests for dev and staging |
+| **CI/CD** | GitHub Actions — build, test, push to ECR |
 
-### Domain Responsibility
+## API Endpoints
 
-| Capability | Description |
-|---|---|
-| **Stock Queries** | Get all inventory, query by product ID, get by item ID |
-| **Restocking** | Add stock quantity to existing products |
-| **Stock Deduction** | Deduct stock during order creation (called by Order service) |
-| **Low Stock Alerts** | Query items at or below reorder level |
-| **Stock Checks** | Validate stock availability before order placement |
-| **CRUD Operations** | Create, update, delete inventory records |
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Backend** | .NET 8, C# 12, ASP.NET Core Web API |
-| **ORM** | Entity Framework Core 8 with SQLite |
-| **Frontend** | Angular 17, TypeScript 5.2, Standalone Components |
-| **API Docs** | Swagger/OpenAPI via Swashbuckle with Annotations |
-| **Testing** | xUnit, EF Core InMemory provider |
-| **Container** | Multi-stage Docker build (Alpine-based) |
-| **Orchestration** | Kubernetes via Helm chart |
-| **GitOps** | ArgoCD application manifests |
-| **CI/CD** | GitHub Actions → ECR → ArgoCD sync |
-| **Monitoring** | Prometheus ServiceMonitor |
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/inventory` | List all inventory items |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
+| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (called by order service) |
+| GET | `/api/inventory/low-stock` | List items at or below reorder level |
+| GET | `/api/inventory/product/{productId}/stock-level` | Get stock level for a product |
+| GET | `/health` | Health check endpoint |
 
 ## Getting Started
 
@@ -55,31 +31,33 @@ A standalone .NET 8 Web API + Angular 17 microservice responsible for managing p
 
 - .NET 8 SDK
 - Node.js 18+
-- Angular CLI (`npm install -g @angular/cli`)
+- Angular CLI
 
 ### Run Locally
 
 **Run locally:**
 ```bash
-# Restore and run the API
-dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
-dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj --urls "http://localhost:5002"
-
-# In a separate terminal, install and run the Angular client
-cd client-app && npm install && ng serve --port 4201
+dotnet restore
+cd src/inventory-service/client-app && npm install && cd ../../..
+dotnet run --project src/inventory-service/InventoryService.csproj
 ```
 
-- **API**: http://localhost:5002
-- **Swagger UI**: http://localhost:5002/swagger
-- **Angular Client**: http://localhost:4201
-
-### Run Tests
+### Run tests
 
 ```bash
 dotnet test --verbosity normal
 ```
 
-## API Reference
+## Project Structure
+
+```
+src/inventory-service/       # .NET 8 Web API + Angular 17 frontend
+tests/InventoryService.Tests/  # xUnit tests
+docker/Dockerfile            # Multi-stage build
+helm/inventory-service/      # Helm chart (deployment, service, HPA, network policy, service monitor)
+argocd/                      # ArgoCD application manifests (dev + staging)
+.github/workflows/           # CI/CD pipeline
+```
 
 ### Endpoints
 
