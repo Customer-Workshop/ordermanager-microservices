@@ -1,23 +1,33 @@
-# Microservices — Decomposed from OrderManager Monolith
+# Inventory Microservice
 
-This repository contains microservices extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith).
+A .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). This service owns all inventory domain logic: stock levels, warehouse locations, restocking, and low-stock alerts.
 
-### Run tests
+## Architecture
 
-A standalone .NET 8 Web API managing stock levels, warehouse locations, and reorder thresholds.
+| Component | Description |
+|-----------|-------------|
+| **API** | .NET 8 Web API with EF Core + SQLite |
+| **Frontend** | Angular 17 standalone components |
+| **IaC** | Helm chart, ArgoCD manifests, GitHub Actions CI/CD |
 
-**Tech Stack**: .NET 8, EF Core (SQLite), Angular 17, Docker, Helm, ArgoCD
-
-#### API Endpoints
+## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{id}` | Get inventory for a product |
-| POST | `/api/inventory/product/{id}/restock` | Restock a product |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith) |
-| GET | `/api/inventory/low-stock` | List low-stock items |
-| GET | `/health` | Health check |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
+| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by order service) |
+| GET | `/api/inventory/low-stock` | List items at or below reorder level |
+| GET | `/health` | Health check endpoint |
+
+## Tech Stack
+
+- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
+- **Frontend**: Angular 17, TypeScript
+- **Container**: Multi-stage Docker build (Alpine)
+- **Orchestration**: Helm, ArgoCD, HPA
+- **CI/CD**: GitHub Actions, Amazon ECR
 
 ## Getting Started
 
@@ -29,29 +39,28 @@ A standalone .NET 8 Web API managing stock levels, warehouse locations, and reor
 ### Run the application
 
 ```bash
-cd services/inventory-service
+# Restore .NET dependencies
+dotnet restore
 
-# Restore and run the API
-dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+# Install Angular dependencies
+cd client-app && npm install && cd ..
+
+# Run the API
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-
-# Run tests
-dotnet test
 ```
 
 The API will be available at `http://localhost:5000`.
 
-## Infrastructure
+### Run tests
 
-- **Docker**: Multi-stage Dockerfile in `docker/`
-- **Helm**: Chart in `helm/inventory-service/` with dev/staging value overrides
-- **ArgoCD**: Application manifests in `argocd/`
-- **CI/CD**: GitHub Actions workflow in `.github/workflows/`
+```bash
+dotnet test
+```
 
-## Platform Conformance
+## Deployment
 
-This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-- Network policies (ingress-nginx, monitoring namespace access)
-- ServiceMonitor for Prometheus scraping
-- HPA for horizontal auto-scaling
-- Namespaced deployments (decomposition-dev, decomposition-staging)
+See `helm/`, `argocd/`, and `.github/workflows/` for deployment configuration.
+
+## License
+
+MIT
