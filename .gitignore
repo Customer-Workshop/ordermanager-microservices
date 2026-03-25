@@ -1,7 +1,6 @@
 ## .NET
 bin/
 obj/
-*.db
 *.user
 *.suo
 .vs/
@@ -12,6 +11,12 @@ dist/
 .angular/
 
 ## IDE
-.idea/
+.vs/
 .vscode/
+.idea/
 *.swp
+*.swo
+
+## OS
+.DS_Store
+Thumbs.db
