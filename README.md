@@ -29,10 +29,10 @@ dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
 **Run tests:**
 ```bash
-dotnet test
+dotnet test --verbosity normal
 ```
 
-## Deployment
+## Project Structure
 
 | Artifact | Path | Description |
 |----------|------|-------------|

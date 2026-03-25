@@ -8,9 +8,9 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly InventoryBusinessService _inventoryService;
+    private readonly InventoryItemService _inventoryService;
 
-    public InventoryController(InventoryBusinessService inventoryService)
+    public InventoryController(InventoryItemService inventoryService)
     {
         _inventoryService = inventoryService;
     }
@@ -48,4 +48,7 @@ public class InventoryController : ControllerBase
         var response = await _inventoryService.CheckAndReserveStockAsync(request);
         return response.Success ? Ok(response) : BadRequest(response);
     }
+
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }

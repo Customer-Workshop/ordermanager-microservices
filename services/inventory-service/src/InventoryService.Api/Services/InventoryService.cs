@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryBusinessService
+public class InventoryItemService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryBusinessService(InventoryDbContext context)
+    public InventoryItemService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -91,5 +91,12 @@ public class InventoryBusinessService
                 Error = $"Failed to reserve stock: {ex.Message}"
             };
         }
+    }
+
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    {
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 }

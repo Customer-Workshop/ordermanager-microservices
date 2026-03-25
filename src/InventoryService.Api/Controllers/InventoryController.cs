@@ -56,9 +56,16 @@ public class InventoryController : ControllerBase
         }
     }
 
+    [HttpPost("product/{productId}/reserve")]
+    public async Task<IActionResult> Reserve(int productId, [FromBody] ReserveRequest request)
+    {
+        var success = await _inventoryService.ReserveStockAsync(productId, request.Quantity);
+        return success ? Ok(new { reserved = true }) : Conflict(new { reserved = false, message = "Insufficient stock" });
+    }
+
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
 
 public record RestockRequest(int Quantity);
-public record DeductRequest(int Quantity);
+public record ReserveRequest(int Quantity);

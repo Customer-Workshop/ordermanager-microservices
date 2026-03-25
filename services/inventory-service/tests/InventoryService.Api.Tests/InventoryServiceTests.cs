@@ -4,6 +4,9 @@ using Xunit;
 using InventoryService.Api.Data;
 using InventoryService.Api.Services;
 using Xunit;
+using InventoryService.Api.Data;
+using InventoryService.Api.Models;
+using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Tests;
 
