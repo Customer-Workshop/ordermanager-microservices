@@ -92,4 +92,34 @@ public class InventoryController : ControllerBase
 
         return Ok(new { reserved = true, productId, quantity = request.Quantity });
     }
+
+    /// <summary>Deduct stock for a product (used by monolith Order service).</summary>
+    /// <param name="productId">The product ID to deduct stock from.</param>
+    /// <param name="request">The deduct request containing the quantity to remove.</param>
+    /// <returns>The updated inventory item after deduction.</returns>
+    /// <response code="200">Stock successfully deducted. Returns the updated inventory item.</response>
+    /// <response code="404">No inventory record found for the given product ID.</response>
+    /// <response code="409">Insufficient stock to fulfill the deduction.</response>
+    [HttpPost("product/{productId}/decrement")]
+    [ProducesResponseType(typeof(InventoryItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DecrementStock(int productId, [FromBody] DeductRequest request)
+    {
+        try
+        {
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+            if (item is null)
+                return NotFound(new { error = $"No inventory record for product {productId}" });
+            return Ok(item);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+    }
 }
+
+/// <summary>Request body for stock deduction operations.</summary>
+/// <param name="Quantity">The quantity to deduct from stock.</param>
+public record DeductRequest(int Quantity);

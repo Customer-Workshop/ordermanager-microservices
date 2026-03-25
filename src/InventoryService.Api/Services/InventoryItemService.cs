@@ -67,4 +67,21 @@ public class InventoryItemService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    /// <summary>Deducts stock for a product and returns the updated inventory item.</summary>
+    /// <returns>The updated inventory item after deduction, or null if product not found.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when insufficient stock is available.</exception>
+    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        if (item is null)
+            return null;
+
+        if (item.QuantityOnHand < quantity)
+            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {quantity}");
+
+        item.QuantityOnHand -= quantity;
+        await _context.SaveChangesAsync();
+        return item;
+    }
 }
