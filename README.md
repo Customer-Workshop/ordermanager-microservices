@@ -1,8 +1,8 @@
-# Inventory Microservice
+# Microservices — Decomposed from OrderManager Monolith
 
 A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder thresholds.
 
-## Architecture
+## Services
 
 | Component | Description |
 |-----------|-------------|
@@ -25,7 +25,15 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager m
 | POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
 | GET | `/health` | Health check |
 
-## Getting Started
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/inventory` | List all inventory items |
+| GET | `/api/inventory/product/{id}` | Get inventory for a product |
+| POST | `/api/inventory/product/{id}/restock` | Restock a product |
+| GET | `/api/inventory/low-stock` | List low-stock items |
+| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
+| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith HTTP client) |
+| GET | `/health` | Health check endpoint |
 
 ### Prerequisites
 - .NET 8 SDK
@@ -38,7 +46,6 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager m
 # Restore and run the API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-```
 
 The API will be available at `http://localhost:5000`.
 

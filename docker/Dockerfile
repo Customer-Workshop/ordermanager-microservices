@@ -1,19 +1,19 @@
 # Stage 1: Build Angular client
 FROM node:20-alpine AS client-build
 WORKDIR /app/client
-COPY client-app/package*.json ./
+COPY services/inventory-service/client-app/package*.json ./
 RUN npm ci
-COPY client-app/ ./
+COPY services/inventory-service/client-app/ ./
 RUN npm run build
 
 # Stage 2: Build .NET API
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS api-build
 WORKDIR /src
-COPY InventoryService.sln ./
-COPY src/InventoryService.Api/InventoryService.Api.csproj src/InventoryService.Api/
-COPY tests/InventoryService.Api.Tests/InventoryService.Api.Tests.csproj tests/InventoryService.Api.Tests/
+COPY services/inventory-service/InventoryService.sln ./
+COPY services/inventory-service/src/InventoryService.Api/InventoryService.Api.csproj src/InventoryService.Api/
+COPY services/inventory-service/tests/InventoryService.Api.Tests/InventoryService.Api.Tests.csproj tests/InventoryService.Api.Tests/
 RUN dotnet restore
-COPY . .
+COPY services/inventory-service/ .
 COPY --from=client-build /app/client/dist/client-app/browser src/InventoryService.Api/wwwroot/
 RUN dotnet publish src/InventoryService.Api/InventoryService.Api.csproj -c Release -o /app/publish
 
