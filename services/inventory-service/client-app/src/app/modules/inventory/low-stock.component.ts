@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <h2>Low Stock Alerts</h2>
+    <h2>Low Stock Items</h2>
     <table *ngIf="items.length">
       <thead>
         <tr>
