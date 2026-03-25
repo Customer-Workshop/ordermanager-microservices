@@ -1,5 +1,5 @@
 {
-  "name": "inventory-client",
+  "name": "inventory-service-client",
   "version": "1.0.0",
   "scripts": {
     "start": "ng serve",
