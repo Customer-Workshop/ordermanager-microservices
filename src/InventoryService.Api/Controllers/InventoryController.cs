@@ -65,6 +65,23 @@ public class InventoryController : ControllerBase
     [ProducesResponseType(typeof(List<InventoryItem>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
+    /// <summary>Checks whether sufficient stock is available for a product.</summary>
+    /// <param name="productId">The product identifier.</param>
+    /// <param name="quantity">The quantity to check availability for.</param>
+    /// <response code="200">Returns stock availability result.</response>
+    /// <response code="404">No inventory record for the given product.</response>
+    [HttpGet("product/{productId}/check")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity)
+    {
+        var item = await _inventoryService.GetInventoryByProductIdAsync(productId);
+        if (item is null)
+            return NotFound(new { error = $"No inventory record for product {productId}" });
+
+        return Ok(new { productId, quantity, available = item.QuantityOnHand >= quantity });
+    }
+
     /// <summary>Deducts stock from an inventory item (called by the Order service during checkout).</summary>
     /// <param name="productId">The product identifier.</param>
     /// <param name="request">The deduction payload containing the quantity to remove.</param>
@@ -81,7 +98,7 @@ public class InventoryController : ControllerBase
 
         var result = await _inventoryService.DeductStockAsync(productId, request.Quantity);
         if (result is null)
-            return Conflict(new { error = $"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {request.Quantity}" });
+            return BadRequest(new { error = $"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {request.Quantity}" });
 
         return Ok(result);
     }
