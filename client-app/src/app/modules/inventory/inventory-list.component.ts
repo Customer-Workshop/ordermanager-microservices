@@ -28,6 +28,7 @@ import { InventoryService } from './inventory.service';
     <table *ngIf="items.length">
       <thead>
         <tr>
+          <th>Product ID</th>
           <th>Product</th>
           <th>Product ID</th>
           <th>On Hand</th>
