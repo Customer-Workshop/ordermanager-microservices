@@ -1,93 +1,51 @@
-# Microservices — Decomposed from OrderManager Monolith
+# app_dotnet-angular-microservices
 
-A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder thresholds.
+Microservices decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Each service owns its domain, database, and deployment pipeline.
 
 ## Services
 
+### Inventory Service
+
 | Component | Description |
 |-----------|-------------|
-| **API** | .NET 8 Web API with EF Core SQLite |
+| **Backend** | .NET 8 Web API with EF Core (SQLite) |
 | **Frontend** | Angular 17 standalone components |
-| **Container** | Multi-stage Docker build (Node + .NET SDK + ASP.NET runtime) |
-| **Orchestration** | Helm chart with HPA, NetworkPolicy, ServiceMonitor |
-| **GitOps** | ArgoCD application manifests for dev and staging |
-| **CI/CD** | GitHub Actions: build, test, push to ECR |
+| **API** | RESTful — `/api/inventory` |
 
-## API Endpoints
+#### Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
-| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/api/inventory/product/{productId}/check?quantity=N` | Check stock availability |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
-| GET | `/health` | Health check |
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/inventory` | List all inventory items |
 | GET | `/api/inventory/product/{id}` | Get inventory for a product |
 | POST | `/api/inventory/product/{id}/restock` | Restock a product |
-| GET | `/api/inventory/low-stock` | List low-stock items |
-| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith HTTP client) |
-| GET | `/health` | Health check endpoint |
+| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by order service) |
+| GET | `/api/inventory/low-stock` | List items at or below reorder level |
+| GET | `/health` | Health check |
 
-### Prerequisites
-- .NET 8 SDK
-- Node.js 18+
-- Angular CLI (`npm install -g @angular/cli`)
-
-### Run locally
+#### Running Locally
 
 ```bash
-# Restore and run the API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+cd client-app && npm install && cd ..
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+```
 
-The API will be available at `http://localhost:5000`.
-
-### Run tests
+#### Running Tests
 
 ```bash
 dotnet test
 ```
 
-## Deployment
+## Infrastructure
 
-See `docker/Dockerfile`, `helm/`, `argocd/`, and `.github/workflows/` for deployment configuration.
+- **Dockerfile**: `docker/Dockerfile` — multi-stage build (Angular + .NET + runtime)
+- **Helm chart**: `helm/inventory-service/` — deployment, service, network policy, service monitor, HPA
+- **ArgoCD**: `argocd/` — application manifests for dev and staging
+- **CI/CD**: `ci/build-push.yaml` — GitHub Actions pipeline (build, test, push to ECR)
 
-```bash
-# Restore .NET dependencies
-dotnet restore services/inventory-service/InventoryService.sln
+Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
-# Install Angular dependencies
-cd services/inventory-service/client-app && npm install && cd -
+## License
 
-# Run the API (serves Angular app too)
-dotnet run --project services/inventory-service/src/InventoryService.Api/InventoryService.Api.csproj
-```
-
-The service will be available at `https://localhost:5001`.
-
-### Run Tests
-
-```bash
-dotnet test services/inventory-service/InventoryService.sln
-```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
-| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith HTTP client) |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-
-## Monolith Integration
-
-The OrderManager monolith calls this service via HTTP instead of direct database access. Configure the monolith with the `InventoryService__BaseUrl` environment variable pointing to this service.
+MIT

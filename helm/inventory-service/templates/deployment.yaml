@@ -1,21 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "inventory-service.fullname" . }}
   labels:
-    app: {{ .Release.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    {{- include "inventory-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      {{- include "inventory-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        {{- include "inventory-service.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -25,33 +24,21 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
+          {{- if .Values.env }}
           env:
-            {{- range .Values.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+            {{- toYaml .Values.env | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: /swagger/index.html
+              path: /health
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
-              path: /swagger/index.html
+              path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
-          {{- if .Values.persistence.enabled }}
-          volumeMounts:
-            - name: data
-              mountPath: /data
-          {{- end }}
-      {{- if .Values.persistence.enabled }}
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-data
-      {{- end }}

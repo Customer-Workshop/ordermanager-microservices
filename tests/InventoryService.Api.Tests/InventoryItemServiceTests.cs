@@ -6,9 +6,9 @@ using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Tests;
 
-public class InventoryServiceTests
+public class InventoryItemServiceTests
 {
-    private InventoryDbContext CreateContext()
+    private static InventoryDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<InventoryDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -27,18 +27,27 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.GetAllInventoryAsync();
-        Assert.Equal(2, result.Count);
+        var items = await service.GetAllInventoryAsync();
+        Assert.Equal(2, items.Count);
     }
 
     [Fact]
-    public async Task GetInventoryByProductIdAsync_ReturnsItem()
+    public async Task GetInventoryByProductIdAsync_ReturnsCorrectItem()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.GetInventoryByProductIdAsync(1);
-        Assert.NotNull(result);
-        Assert.Equal("Widget A", result.ProductName);
+        var item = await service.GetInventoryByProductIdAsync(1);
+        Assert.NotNull(item);
+        Assert.Equal("Widget A", item.ProductName);
+    }
+
+    [Fact]
+    public async Task GetInventoryByProductIdAsync_ReturnsNullForMissing()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var item = await service.GetInventoryByProductIdAsync(999);
+        Assert.Null(item);
     }
 
     [Fact]
@@ -46,45 +55,43 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.RestockAsync(1, 25);
-        Assert.Equal(75, result.QuantityOnHand);
+        var item = await service.RestockAsync(1, 25);
+        Assert.Equal(75, item.QuantityOnHand);
     }
 
     [Fact]
-    public async Task GetLowStockItemsAsync_ReturnsLowStockOnly()
+    public async Task RestockAsync_ThrowsForMissingProduct()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.GetLowStockItemsAsync();
-        Assert.Single(result);
-        Assert.Equal("Widget B", result[0].ProductName);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.RestockAsync(999, 10));
     }
 
     [Fact]
-    public async Task CheckStockAsync_ReturnsTrueWhenSufficient()
+    public async Task GetLowStockItemsAsync_ReturnsOnlyLowStockItems()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        Assert.True(await service.CheckStockAsync(1, 50));
-        Assert.False(await service.CheckStockAsync(1, 51));
+        var items = await service.GetLowStockItemsAsync();
+        Assert.Single(items);
+        Assert.Equal("Widget B", items[0].ProductName);
     }
 
     [Fact]
-    public async Task DeductStockAsync_DeductsWhenSufficient()
+    public async Task DeductStockAsync_DecreasesQuantity()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.DeductStockAsync(1, 10);
-        Assert.NotNull(result);
-        Assert.Equal(40, result.QuantityOnHand);
+        var item = await service.DeductStockAsync(1, 10);
+        Assert.NotNull(item);
+        Assert.Equal(40, item.QuantityOnHand);
     }
 
     [Fact]
-    public async Task DeductStockAsync_ReturnsNullWhenInsufficient()
+    public async Task DeductStockAsync_ThrowsForInsufficientStock()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var result = await service.DeductStockAsync(1, 51);
-        Assert.Null(result);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.DeductStockAsync(2, 100));
     }
 }
