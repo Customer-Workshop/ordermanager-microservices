@@ -75,10 +75,15 @@ public class InventoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
-        var success = await _inventoryService.CheckAndDeductStockAsync(productId, request.Quantity);
-        if (!success)
-            return Conflict(new { message = $"Insufficient stock for product {productId}" });
-        return Ok(new { message = "Stock deducted successfully" });
+        var item = await _inventoryService.GetInventoryByProductIdAsync(productId);
+        if (item is null)
+            return NotFound(new { error = $"No inventory record for product {productId}" });
+
+        var result = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+        if (result is null)
+            return Conflict(new { error = $"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {request.Quantity}" });
+
+        return Ok(result);
     }
 }
 
