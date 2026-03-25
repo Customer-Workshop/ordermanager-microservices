@@ -11,10 +11,23 @@ import { environment } from '../../../environments/environment';
   template: `
     <h2>Inventory</h2>
     <table *ngIf="items.length">
-      <thead><tr><th>Product</th><th>On Hand</th><th>Reorder Level</th><th>Location</th><th>Last Restocked</th><th>Actions</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>On Hand</th>
+          <th>Reorder Level</th>
+          <th>Location</th>
+          <th>Last Restocked</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
-          <td>{{i.productName}}</td><td>{{i.quantityOnHand}}</td><td>{{i.reorderLevel}}</td><td>{{i.warehouseLocation}}</td><td>{{i.lastRestocked | date}}</td>
+          <td>{{i.productName}}</td>
+          <td>{{i.quantityOnHand}}</td>
+          <td>{{i.reorderLevel}}</td>
+          <td>{{i.warehouseLocation}}</td>
+          <td>{{i.lastRestocked | date}}</td>
           <td>
             <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty">
             <button (click)="restock(i.productId)">Restock</button>
@@ -40,9 +53,12 @@ export class InventoryListComponent implements OnInit {
   }
 
   restock(productId: number) {
-    const qty = this.restockQuantities[productId] || 0;
-    if (qty <= 0) return;
+    const qty = this.restockQuantities[productId];
+    if (!qty || qty < 1) return;
     this.http.post(`${environment.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: qty })
-      .subscribe(() => this.loadInventory());
+      .subscribe(() => {
+        this.restockQuantities[productId] = 0;
+        this.loadInventory();
+      });
   }
 }

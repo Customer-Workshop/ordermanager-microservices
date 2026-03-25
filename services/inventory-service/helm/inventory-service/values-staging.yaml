@@ -5,7 +5,7 @@ image:
 
 ingress:
   hosts:
-    - host: inventory-service-staging.workshop.local
+    - host: inventory-staging.workshop.local
       paths:
         - path: /
           pathType: Prefix
