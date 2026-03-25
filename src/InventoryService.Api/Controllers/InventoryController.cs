@@ -27,36 +27,45 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-        return Ok(item);
+        try
+        {
+            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("product/{productId}/deduct")]
+    public async Task<IActionResult> Deduct(int productId, [FromBody] DeductRequest request)
+    {
+        try
+        {
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("product/{productId}/reserve")]
+    public async Task<IActionResult> Reserve(int productId, [FromBody] ReserveRequest request)
+    {
+        var success = await _inventoryService.ReserveStockAsync(productId, request.Quantity);
+        return success ? Ok(new { reserved = true }) : Conflict(new { reserved = false, message = "Insufficient stock" });
     }
 
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
-
-    [HttpGet("product/{productId}/check")]
-    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity)
-    {
-        var available = await _inventoryService.CheckStockAsync(productId, quantity);
-        return Ok(new { productId, quantity, available });
-    }
-
-    [HttpPost("product/{productId}/deduct")]
-    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
-    {
-        var success = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-        if (!success)
-            return BadRequest(new { message = $"Insufficient stock for product {productId}" });
-        return Ok(new { message = "Stock deducted successfully" });
-    }
-
-    [HttpGet("product/{productId}/stock-level")]
-    public async Task<IActionResult> GetStockLevel(int productId)
-    {
-        var level = await _inventoryService.GetStockLevelAsync(productId);
-        return Ok(new { productId, quantityOnHand = level });
-    }
 }
 
 public record RestockRequest(int Quantity);
-public record DeductRequest(int Quantity);
+public record ReserveRequest(int Quantity);
