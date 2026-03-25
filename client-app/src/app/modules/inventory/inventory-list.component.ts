@@ -11,16 +11,7 @@ import { environment } from '../../../environments/environment';
   template: `
     <h2>Inventory</h2>
     <table *ngIf="items.length">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>On Hand</th>
-          <th>Reorder Level</th>
-          <th>Location</th>
-          <th>Last Restocked</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Product</th><th>On Hand</th><th>Reorder Level</th><th>Location</th><th>Last Restocked</th><th>Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
           <td>{{i.productName}}</td><td>{{i.quantityOnHand}}</td><td>{{i.reorderLevel}}</td><td>{{i.warehouseLocation}}</td><td>{{i.lastRestocked | date}}</td>
@@ -31,7 +22,6 @@ import { environment } from '../../../environments/environment';
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">No inventory items found.</p>
   `
 })
 export class InventoryListComponent implements OnInit {

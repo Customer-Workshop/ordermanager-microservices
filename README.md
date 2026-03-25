@@ -14,14 +14,6 @@ A .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Man
 | `/api/inventory/product/{id}/deduct` | POST | Deduct stock (used by OrderManager) |
 | `/health` | GET | Health check |
 
-## Tech Stack
-
-- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
-- **Frontend**: Angular 17, TypeScript
-- **Container**: Multi-stage Docker build (Alpine)
-- **Orchestration**: Helm, ArgoCD, HPA
-- **CI/CD**: GitHub Actions, Amazon ECR
-
 ## Getting Started
 
 ### Prerequisites
@@ -29,16 +21,10 @@ A .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Man
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run the application
+### Run locally
 
 ```bash
-# Restore .NET dependencies
-dotnet restore
-
-# Install Angular dependencies
-cd client-app && npm install && cd ..
-
-# Run the API
+dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 ```
 
@@ -47,10 +33,10 @@ The application will be available at `http://localhost:5000`.
 ### Run tests
 
 ```bash
-dotnet test
+dotnet test --verbosity normal
 ```
 
-## Deployment
+## Project Structure
 
 - **Docker**: Multi-stage build in `docker/Dockerfile`
 - **Helm**: Kubernetes deployment chart in `helm/inventory-service/`

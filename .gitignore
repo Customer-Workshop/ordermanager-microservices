@@ -2,7 +2,9 @@ bin/
 obj/
 *.user
 *.suo
-.vs/
+*.db
+
+## Node
 node_modules/
 dist/
 .angular/
