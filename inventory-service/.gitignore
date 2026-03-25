@@ -1,17 +1,11 @@
-## .NET
 bin/
 obj/
-*.db
 *.user
 *.suo
 .vs/
-
-## Node
 node_modules/
 dist/
 .angular/
-
-## IDE
-.idea/
-.vscode/
-*.swp
+*.db
+appsettings.Development.json
+wwwroot/
