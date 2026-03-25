@@ -13,7 +13,21 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Inventory Service API",
+        Version = "v1",
+        Description = "Microservice responsible for inventory management — stock levels, warehouse locations, restocking, and stock checks.",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Platform Team"
+        }
+    });
+    c.EnableAnnotations();
+});
+
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
@@ -29,7 +43,11 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventory Service API v1");
+});
+
 app.UseCors();
 app.UseStaticFiles();
 app.MapControllers();

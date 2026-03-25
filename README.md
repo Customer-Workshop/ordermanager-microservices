@@ -1,28 +1,109 @@
 # Inventory Microservice
 
-Standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts independently.
+A standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages product inventory, stock levels, warehouse locations, and reorder alerts.
 
 ## Architecture
 
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | .NET 8 Web API, EF Core, SQLite |
-| **Frontend** | Angular 17, TypeScript |
-| **Container** | Multi-stage Docker build |
-| **Orchestration** | Helm chart, ArgoCD, HPA |
-| **CI/CD** | GitHub Actions → ECR → ArgoCD sync |
+This microservice is part of a decomposition strategy that extracts tightly coupled modules from the OrderManager monolith into independently deployable services.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Inventory Service                      │
+│                                                          │
+│  ┌──────────────┐  ┌────────────────┐  ┌──────────────┐ │
+│  │  Angular 17   │  │  .NET 8 API    │  │  SQLite DB   │ │
+│  │  Frontend     │──│  Controllers   │──│  EF Core     │ │
+│  │  (SPA)        │  │  Services      │  │              │ │
+│  └──────────────┘  └────────────────┘  └──────────────┘ │
+│                           │                              │
+│                    /health endpoint                      │
+│                    /swagger docs                         │
+└─────────────────────────────────────────────────────────┘
+         │                    ▲
+         │                    │ HTTP (REST)
+         ▼                    │
+┌─────────────────┐  ┌───────────────────┐
+│  Ingress/NGINX  │  │  OrderManager     │
+│                 │  │  Monolith         │
+└─────────────────┘  │  (HTTP Client)    │
+                     └───────────────────┘
+```
+
+### Bounded Context
+
+| Concern | Inventory Service | Monolith (Orders) |
+|---------|-------------------|-------------------|
+| Stock levels | Owns | Calls via HTTP |
+| Restock operations | Owns | N/A |
+| Stock reservation | Owns (API) | Calls `/reserve` |
+| Product catalog | References by ID | Owns |
+| Order creation | N/A | Owns |
+
+## Tech Stack
+
+- **Backend**: .NET 8, C# 12, Entity Framework Core 8, SQLite
+- **Frontend**: Angular 17, TypeScript 5.2, Standalone Components
+- **API**: RESTful with OpenAPI 3.0 / Swagger
+- **Container**: Multi-stage Docker build (Alpine-based runtime)
+- **Orchestration**: Kubernetes (Helm chart, HPA, NetworkPolicy)
+- **CI/CD**: GitHub Actions → Amazon ECR → ArgoCD
+- **Monitoring**: Prometheus ServiceMonitor
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{id}` | Get inventory for a product |
-| POST | `/api/inventory/product/{id}/restock` | Restock a product |
-| GET | `/api/inventory/low-stock` | List items below reorder level |
-| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith) |
-| GET | `/health` | Health check endpoint |
+| `GET` | `/api/inventory` | List all inventory items |
+| `GET` | `/api/inventory/product/{productId}` | Get inventory for a specific product |
+| `POST` | `/api/inventory/product/{productId}/restock` | Restock a product |
+| `GET` | `/api/inventory/low-stock` | Get items at or below reorder level |
+| `POST` | `/api/inventory/product/{productId}/reserve` | Reserve stock for an order |
+| `GET` | `/health` | Health check (includes DB connectivity) |
+| `GET` | `/swagger` | OpenAPI / Swagger UI |
+
+### Request/Response Examples
+
+#### List All Inventory
+```http
+GET /api/inventory
+```
+```json
+[
+  {
+    "id": 1,
+    "productId": 1,
+    "productName": "Widget A",
+    "quantityOnHand": 50,
+    "reorderLevel": 10,
+    "warehouseLocation": "A-01",
+    "lastRestocked": "2024-01-15T10:30:00Z"
+  }
+]
+```
+
+#### Restock a Product
+```http
+POST /api/inventory/product/1/restock
+Content-Type: application/json
+
+{ "quantity": 25 }
+```
+
+#### Reserve Stock (used by Order service)
+```http
+POST /api/inventory/product/1/reserve
+Content-Type: application/json
+
+{ "quantity": 5 }
+```
+Response `200 OK`:
+```json
+{ "reserved": true, "productId": 1, "quantity": 5 }
+```
+Response `409 Conflict`:
+```json
+{ "error": "Insufficient stock for product 1" }
+```
 
 ## Getting Started
 
@@ -31,47 +112,91 @@ Standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager mon
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run locally
+### Run Locally
 
 ```bash
-# Restore and run API
-dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
-dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+# Restore .NET dependencies
+dotnet restore
 
-# Install and build Angular client
-cd client-app && npm install && npm run build && cd ..
+# Install Angular dependencies
+cd client-app && npm install && cd ..
+
+# Run tests
+dotnet test
+
+# Run the API (serves Angular app too)
+dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 ```
 
-### Run tests
+The service will be available at `http://localhost:5000`:
+- **UI**: http://localhost:5000
+- **Swagger**: http://localhost:5000/swagger
+- **Health**: http://localhost:5000/health
+
+### Docker
 
 ```bash
-dotnet test
+docker build -f docker/Dockerfile -t inventory-service .
+docker run -p 8080:8080 inventory-service
 ```
 
 ## Project Structure
 
 ```
-src/InventoryService.Api/     # .NET 8 Web API
-  Controllers/                # REST controllers
-  Models/                     # EF Core entity models
-  Services/                   # Business logic
-  Data/                       # DbContext and seed data
-client-app/                   # Angular 17 frontend
-docker/Dockerfile             # Multi-stage container build
-helm/inventory-service/       # Helm chart
-argocd/                       # ArgoCD application manifests
-.github/workflows/            # CI/CD pipeline
-tests/                        # Unit tests
+├── src/
+│   └── InventoryService.Api/
+│       ├── Controllers/       # API endpoints
+│       ├── Models/            # Domain models & DTOs
+│       ├── Services/          # Business logic
+│       ├── Data/              # EF Core DbContext & seed data
+│       └── Program.cs         # Application entry point
+├── tests/
+│   └── InventoryService.Api.Tests/  # xUnit tests
+├── client-app/                # Angular 17 SPA
+│   └── src/app/modules/inventory/
+├── docker/Dockerfile          # Multi-stage container build
+├── helm/inventory-service/    # Kubernetes Helm chart
+├── argocd/                    # ArgoCD application manifests
+├── .github/workflows/         # CI/CD pipeline
+└── docs/                      # Additional documentation
 ```
 
-## Platform Conformance
+## Deployment
 
-This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-- Network policies (default-deny + explicit allow)
-- Prometheus ServiceMonitor for metrics
-- HPA for autoscaling
-- ArgoCD GitOps deployment
-- cert-manager TLS annotations
+### Helm Chart
+
+```bash
+helm install inventory-service helm/inventory-service -n decomposition-dev
+```
+
+### ArgoCD
+
+Apply the ArgoCD application manifests:
+```bash
+kubectl apply -f argocd/application-dev.yaml
+kubectl apply -f argocd/application-staging.yaml
+```
+
+### Environment-Specific Configuration
+
+| Environment | Replicas | HPA | Persistence | Host |
+|-------------|----------|-----|-------------|------|
+| Dev | 1 | Off | Off (in-memory) | inventory-service-dev.workshop.local |
+| Staging | 2 | 2-4 pods | On (1Gi gp2) | inventory-service-staging.workshop.local |
+| Production | 1+ | On | On (1Gi gp2) | inventory-service.workshop.local |
+
+## Integration with OrderManager Monolith
+
+The monolith's `OrderService` has been refactored to call this microservice via HTTP instead of directly querying the shared database:
+
+```csharp
+// Before (monolith — direct DB access):
+var inventory = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+
+// After (monolith — HTTP client to inventory service):
+var inventory = await _inventoryHttpClient.GetInventoryByProductIdAsync(productId);
+var reserved = await _inventoryHttpClient.ReserveStockAsync(productId, quantity);
+```
 
 ## License
 
