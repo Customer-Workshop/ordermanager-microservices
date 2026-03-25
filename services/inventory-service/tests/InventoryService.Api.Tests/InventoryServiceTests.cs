@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Xunit;
+using InventoryService.Api.Data;
+using InventoryService.Api.Services;
 using Xunit;
 using InventoryService.Api.Data;
 using InventoryService.Api.Models;
@@ -12,18 +16,13 @@ public class InventoryServiceTests
     {
         var options = new DbContextOptionsBuilder<InventoryDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         var context = new InventoryDbContext(options);
-        context.InventoryItems.Add(new InventoryItem
-        {
-            Id = 1, ProductId = 1, ProductName = "Widget A",
-            QuantityOnHand = 50, ReorderLevel = 10, WarehouseLocation = "A-01"
-        });
-        context.InventoryItems.Add(new InventoryItem
-        {
-            Id = 2, ProductId = 2, ProductName = "Widget B",
-            QuantityOnHand = 5, ReorderLevel = 10, WarehouseLocation = "A-02"
-        });
+        context.InventoryItems.AddRange(
+            new InventoryItem { Id = 1, ProductId = 1, ProductName = "Widget A", Sku = "WGT-001", QuantityOnHand = 50, ReorderLevel = 10, WarehouseLocation = "A-01" },
+            new InventoryItem { Id = 2, ProductId = 2, ProductName = "Widget B", Sku = "WGT-002", QuantityOnHand = 5, ReorderLevel = 10, WarehouseLocation = "A-02" }
+        );
         context.SaveChanges();
         return context;
     }
@@ -48,7 +47,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetByProductId_ReturnsNull_WhenNotFound()
+    public async Task GetByProductId_ReturnsNullForMissing()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -66,30 +65,47 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task DecrementStock_DecreasesQuantity()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var result = await service.DecrementStockAsync(1, 10);
-        Assert.Equal(40, result.QuantityOnHand);
-    }
-
-    [Fact]
-    public async Task DecrementStock_ThrowsOnInsufficientStock()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.DecrementStockAsync(1, 100));
-    }
-
-    [Fact]
-    public async Task GetLowStockItems_ReturnsOnlyLowStock()
+    public async Task GetLowStock_ReturnsOnlyLowItems()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
         var result = await service.GetLowStockItemsAsync();
         Assert.Single(result);
-        Assert.Equal("Widget B", result[0].ProductName);
+        Assert.Equal(2, result[0].ProductId);
+    }
+
+    [Fact]
+    public async Task CheckAndReserve_SuccessfulReservation()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var request = new StockReservationRequest
+        {
+            Items = new List<StockReservationItem>
+            {
+                new() { ProductId = 1, Quantity = 10 }
+            }
+        };
+        var result = await service.CheckAndReserveStockAsync(request);
+        Assert.True(result.Success);
+        Assert.Single(result.ReservedItems);
+        Assert.Equal(40, result.ReservedItems[0].RemainingStock);
+    }
+
+    [Fact]
+    public async Task CheckAndReserve_InsufficientStock()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var request = new StockReservationRequest
+        {
+            Items = new List<StockReservationItem>
+            {
+                new() { ProductId = 2, Quantity = 100 }
+            }
+        };
+        var result = await service.CheckAndReserveStockAsync(request);
+        Assert.False(result.Success);
+        Assert.Contains("Insufficient stock", result.Error!);
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
@@ -38,27 +39,16 @@ public class InventoryController : ControllerBase
         }
     }
 
-    [HttpPost("product/{productId}/decrement")]
-    public async Task<IActionResult> Decrement(int productId, [FromBody] DecrementRequest request)
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
+
+    [HttpPost("check-and-reserve")]
+    public async Task<IActionResult> CheckAndReserve([FromBody] StockReservationRequest request)
     {
-        try
-        {
-            var item = await _inventoryService.DecrementStockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { error = ex.Message });
-        }
+        var response = await _inventoryService.CheckAndReserveStockAsync(request);
+        return response.Success ? Ok(response) : BadRequest(response);
     }
 
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
-
-public record RestockRequest(int Quantity);
-public record DecrementRequest(int Quantity);
