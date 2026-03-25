@@ -54,6 +54,20 @@ public class InventoryController : ControllerBase
             return Conflict(new { error = ex.Message });
         }
     }
+
+    [HttpPost("product/{productId}/deduct")]
+    public async Task<IActionResult> Deduct(int productId, [FromBody] DecrementRequest request)
+    {
+        try
+        {
+            var item = await _inventoryService.DecrementStockAsync(productId, request.Quantity);
+            return item is null ? NotFound() : Ok(item);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+    }
 }
 
 public record RestockRequest(int Quantity);
