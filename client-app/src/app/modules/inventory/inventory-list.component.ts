@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inventory-list',
@@ -9,9 +10,14 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   template: `
     <h2>Inventory</h2>
+    <div class="actions">
+      <button (click)="loadAll()">All Items</button>
+      <button (click)="loadLowStock()">Low Stock</button>
+    </div>
     <table *ngIf="items.length">
       <thead>
         <tr>
+          <th>Product ID</th>
           <th>Product</th>
           <th>On Hand</th>
           <th>Reorder Level</th>
@@ -22,51 +28,40 @@ import { FormsModule } from '@angular/forms';
       </thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
+          <td>{{i.productId}}</td>
           <td>{{i.productName}}</td>
-          <td>{{i.sku}}</td>
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQty[i.productId]" placeholder="Qty" min="1" style="width:60px">
+            <input type="number" [(ngModel)]="restockQty" min="1" placeholder="Qty" style="width:60px">
             <button (click)="restock(i.productId)">Restock</button>
           </td>
         </tr>
       </tbody>
     </table>
-    <div *ngIf="!items.length">No inventory items found.</div>
-
-    <h3>Low Stock Items</h3>
-    <ul>
-      <li *ngFor="let i of lowStockItems">
-        {{i.productName}} - {{i.quantityOnHand}} remaining (reorder level: {{i.reorderLevel}})
-      </li>
-    </ul>
-    <div *ngIf="!lowStockItems.length">No low stock items.</div>
+    <p *ngIf="!items.length">Loading inventory...</p>
   `
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  restockQty: { [key: number]: number } = {};
+  restockQty = 10;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  ngOnInit() {
-    this.loadInventory();
+  ngOnInit() { this.loadAll(); }
+
+  loadAll() {
+    this.http.get<any[]>(`${this.apiUrl}/api/inventory`).subscribe(data => this.items = data);
   }
 
-  loadInventory() {
-    this.http.get<any[]>('/api/inventory').subscribe(data => this.items = data);
+  loadLowStock() {
+    this.http.get<any[]>(`${this.apiUrl}/api/inventory/low-stock`).subscribe(data => this.items = data);
   }
-
   restock(productId: number) {
-    const qty = this.restockQty[productId];
-    if (!qty || qty <= 0) return;
-    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: qty })
-      .subscribe(() => {
-        this.restockQty[productId] = 0;
-        this.loadInventory();
-      });
+    this.http.post(`${this.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: this.restockQty })
+      .subscribe(() => this.loadAll());
   }
 }

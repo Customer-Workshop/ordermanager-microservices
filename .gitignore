@@ -4,27 +4,10 @@ obj/
 *.db
 *.user
 *.suo
-*.cache
-*.dll
-*.pdb
-*.db
-*.db-shm
-*.db-wal
-
-## Angular
-client-app/node_modules/
+.vs/
 node_modules/
 dist/
 .angular/
-
-## Build output
-**/wwwroot/
-
-## Config
+*.db
 appsettings.Development.json
-
-## IDE
-.idea/
-.vscode/
-*.swp
-*.swo
+wwwroot/

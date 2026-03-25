@@ -1,86 +1,46 @@
 # Inventory Microservice
 
-A standalone .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder alerts.
+Standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts independently.
 
 ## Architecture
 
-This microservice owns the **Inventory** bounded context:
+| Component | Description |
+|-----------|-------------|
+| **API** | .NET 8 Web API with EF Core + SQLite |
+| **Frontend** | Angular 17 standalone components |
+| **Dockerfile** | Multi-stage build (Node + .NET SDK + runtime) |
+| **Helm** | Kubernetes deployment, service, ingress, network policy, HPA, service monitor |
+| **ArgoCD** | GitOps application manifests for dev and staging |
+| **CI/CD** | GitHub Actions — build, test, push to ECR, trigger ArgoCD sync |
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/inventory` | GET | List all inventory items |
-| `/api/inventory/product/{id}` | GET | Get inventory for a specific product |
-| `/api/inventory/product/{id}/restock` | POST | Restock a product |
-| `/api/inventory/product/{id}/check` | GET | Check stock availability |
-| `/api/inventory/product/{id}/deduct` | POST | Deduct stock (called by order-service) |
-| `/api/inventory/low-stock` | GET | List items at or below reorder level |
-| `/health` | GET | Health check endpoint |
+## API Endpoints
 
-## Tech Stack
-
-- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
-- **Frontend**: Angular 17, TypeScript
-- **API**: RESTful with Swagger/OpenAPI
-- **Container**: Multi-stage Docker build
-- **Orchestration**: Helm chart, ArgoCD, HPA
-- **Observability**: Prometheus ServiceMonitor
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/inventory` | List all inventory items |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
+| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
+| GET | `/api/inventory/low-stock` | List low-stock items |
+| GET | `/api/inventory/product/{productId}/check?quantity=N` | Check stock availability |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
+| GET | `/health` | Health check endpoint |
 
 ## Getting Started
 
-### Prerequisites
-- .NET 8 SDK
-- Node.js 18+
-- Angular CLI (`npm install -g @angular/cli`)
-
-### Run the application
-
 ```bash
-# Restore and run .NET API
-dotnet restore
+# Restore .NET dependencies
+dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+
+# Install Angular dependencies
+cd client-app && npm install && cd ..
+
+# Run the API
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
-# (Optional) Install and build Angular client
-cd client-app && npm install && npm run build && cd ..
-```
-
-The API will be available at `https://localhost:5001`.
-
-### Run tests
-
-```bash
-dotnet test --verbosity normal
-```
-
-## Deployment
-
-### Docker
-
-```bash
-docker build -f docker/Dockerfile -t inventory-service .
-docker run -p 8080:8080 inventory-service
-```
-
-### Kubernetes (Helm)
-
-```bash
-helm install inventory-service helm/inventory-service -f helm/inventory-service/values-dev.yaml
-```
-
-### ArgoCD
-
-Apply the application manifest:
-
-```bash
-kubectl apply -f argocd/application-dev.yaml
+# Run tests
+dotnet test
 ```
 
 ## Platform Conformance
 
-This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-
-- Deploys to `decomposition-dev` / `decomposition-staging` namespaces
-- Network policy restricts ingress to nginx and monitoring namespaces
-- Prometheus metrics exposed via ServiceMonitor
-- ECR for container image storage
-- Health check endpoint at `/health`
-- Own database (no shared database)
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard, including namespace isolation, network policies, Prometheus monitoring, and ArgoCD GitOps deployments.
