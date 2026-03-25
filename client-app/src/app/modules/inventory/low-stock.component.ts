@@ -1,35 +1,74 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
+
+interface InventoryItem {
+  id: number;
+  productId: number;
+  productName: string;
+  quantityOnHand: number;
+  reorderLevel: number;
+  warehouseLocation: string;
+  lastRestocked: string;
+}
 
 @Component({
   selector: 'app-low-stock',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
-    <h2>Low Stock Items</h2>
+    <h2>Low Stock Alerts</h2>
     <table *ngIf="items.length">
-      <thead><tr><th>Product</th><th>Product ID</th><th>On Hand</th><th>Reorder Level</th><th>Location</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>On Hand</th>
+          <th>Reorder Level</th>
+          <th>Location</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr *ngFor="let i of items">
+        <tr *ngFor="let i of items" class="low-stock">
           <td>{{i.productName}}</td>
-          <td>{{i.productId}}</td>
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
+          <td>
+            <div class="actions">
+              <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty" style="width: 80px">
+              <button (click)="restock(i.productId)">Restock</button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">All items are sufficiently stocked.</p>
+    <p *ngIf="!items.length">All items are adequately stocked.</p>
   `
 })
 export class LowStockComponent implements OnInit {
-  items: any[] = [];
+  items: InventoryItem[] = [];
+  restockQuantities: { [productId: number]: number } = {};
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>(`${environment.apiUrl}/api/inventory/low-stock`).subscribe(data => this.items = data);
+    this.loadLowStock();
+  }
+
+  loadLowStock() {
+    this.http.get<InventoryItem[]>(`${environment.apiUrl}/inventory/low-stock`).subscribe(data => this.items = data);
+  }
+
+  restock(productId: number) {
+    const qty = this.restockQuantities[productId] || 0;
+    if (qty <= 0) return;
+    this.http.post(`${environment.apiUrl}/inventory/product/${productId}/restock`, { quantity: qty })
+      .subscribe(() => {
+        this.restockQuantities[productId] = 0;
+        this.loadLowStock();
+      });
   }
 }

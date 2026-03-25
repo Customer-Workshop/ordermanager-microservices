@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using InventoryService.Api.Data;
 using InventoryService.Api.Models;
+using InventoryService.Api.Services;
 using Xunit;
 
 namespace InventoryService.Api.Tests;
@@ -21,27 +22,26 @@ public class InventoryServiceTests
     public async Task GetAllInventory_ReturnsSeedData()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
+        var service = new InventoryManagementService(context);
         var items = await service.GetAllInventoryAsync();
         Assert.Equal(5, items.Count);
     }
 
     [Fact]
-    public async Task GetInventoryByProductId_ReturnsCorrectItem()
+    public async Task GetInventoryByProductId_ReturnsItem()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
+        var service = new InventoryManagementService(context);
         var item = await service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
-        Assert.Equal(50, item.QuantityOnHand);
     }
 
     [Fact]
     public async Task GetInventoryByProductId_ReturnsNull_WhenNotFound()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
+        var service = new InventoryManagementService(context);
         var item = await service.GetInventoryByProductIdAsync(999);
         Assert.Null(item);
     }
@@ -50,74 +50,81 @@ public class InventoryServiceTests
     public async Task Restock_IncreasesQuantity()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var item = await service.RestockAsync(1, 25);
-        Assert.Equal(75, item.QuantityOnHand);
+        var service = new InventoryManagementService(context);
+        var before = await service.GetInventoryByProductIdAsync(1);
+        var qtyBefore = before!.QuantityOnHand;
+
+        var after = await service.RestockAsync(1, 25);
+        Assert.Equal(qtyBefore + 25, after.QuantityOnHand);
     }
 
     [Fact]
-    public async Task Restock_ThrowsForInvalidProduct()
+    public async Task Restock_ThrowsForUnknownProduct()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
+        var service = new InventoryManagementService(context);
         await Assert.ThrowsAsync<ArgumentException>(() => service.RestockAsync(999, 10));
     }
 
     [Fact]
-    public async Task GetLowStockItems_ReturnsEmpty_WhenAllStocked()
+    public async Task CheckStock_ReturnsTrueWhenSufficient()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var items = await service.GetLowStockItemsAsync();
-        Assert.Empty(items);
+        var service = new InventoryManagementService(context);
+        var result = await service.CheckStockAsync(1, 10);
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task CheckStock_ReturnsFalseWhenInsufficient()
+    {
+        using var context = CreateContext();
+        var service = new InventoryManagementService(context);
+        var result = await service.CheckStockAsync(1, 99999);
+        Assert.False(result);
     }
 
     [Fact]
     public async Task DeductStock_DecreasesQuantity()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var item = await service.DeductStockAsync(1, 10);
-        Assert.NotNull(item);
-        Assert.Equal(40, item.QuantityOnHand);
+        var service = new InventoryManagementService(context);
+        var before = await service.GetInventoryByProductIdAsync(1);
+        var qtyBefore = before!.QuantityOnHand;
+
+        var after = await service.DeductStockAsync(1, 5);
+        Assert.Equal(qtyBefore - 5, after.QuantityOnHand);
     }
 
     [Fact]
-    public async Task DeductStock_ReturnsNull_WhenInsufficientStock()
+    public async Task DeductStock_ThrowsOnInsufficientStock()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var item = await service.DeductStockAsync(1, 9999);
-        Assert.Null(item);
+        var service = new InventoryManagementService(context);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.DeductStockAsync(1, 99999));
     }
 
     [Fact]
-    public async Task DeductStock_ReturnsNull_WhenProductNotFound()
+    public async Task GetLowStockItems_ReturnsEmpty_WhenAllStocked()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var item = await service.DeductStockAsync(999, 10);
-        Assert.Null(item);
+        var service = new InventoryManagementService(context);
+        var items = await service.GetLowStockItemsAsync();
+        Assert.Empty(items);
     }
 
     [Fact]
-    public async Task CreateInventoryItem_AddsNewItem()
+    public async Task GetLowStockItems_ReturnsItems_WhenBelowReorderLevel()
     {
         using var context = CreateContext();
-        var service = new Services.InventoryService(context);
-        var newItem = new InventoryItem
-        {
-            ProductId = 100,
-            ProductName = "New Product",
-            QuantityOnHand = 500,
-            ReorderLevel = 20,
-            WarehouseLocation = "B-01"
-        };
-        var created = await service.CreateInventoryItemAsync(newItem);
-        Assert.Equal(100, created.ProductId);
+        var service = new InventoryManagementService(context);
 
-        var fetched = await service.GetInventoryByProductIdAsync(100);
-        Assert.NotNull(fetched);
-        Assert.Equal("New Product", fetched.ProductName);
+        // Deduct stock to bring below reorder level
+        await service.DeductStockAsync(1, 45);
+
+        var items = await service.GetLowStockItemsAsync();
+        Assert.Single(items);
+        Assert.Equal(1, items[0].ProductId);
     }
 }

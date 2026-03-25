@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using InventoryService.Api.Models;
+using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
 
@@ -7,9 +7,9 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly Services.InventoryService _inventoryService;
+    private readonly InventoryManagementService _inventoryService;
 
-    public InventoryController(Services.InventoryService inventoryService)
+    public InventoryController(InventoryManagementService inventoryService)
     {
         _inventoryService = inventoryService;
     }
@@ -27,45 +27,34 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        try
-        {
-            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+        return Ok(item);
     }
 
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
+    [HttpGet("product/{productId}/check")]
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
+    {
+        var available = await _inventoryService.CheckStockAsync(productId, quantity);
+        return Ok(new { productId, quantity, available });
+    }
+
     [HttpPost("product/{productId}/deduct")]
     public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
-        var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-        if (item is null)
-            return BadRequest(new { error = $"Insufficient stock or no inventory record for product {productId}" });
-        return Ok(item);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateInventoryRequest request)
-    {
-        var item = new InventoryItem
+        try
         {
-            ProductId = request.ProductId,
-            ProductName = request.ProductName,
-            QuantityOnHand = request.QuantityOnHand,
-            ReorderLevel = request.ReorderLevel,
-            WarehouseLocation = request.WarehouseLocation
-        };
-        var created = await _inventoryService.CreateInventoryItemAsync(item);
-        return CreatedAtAction(nameof(GetByProduct), new { productId = created.ProductId }, created);
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
     }
 }
 
 public record RestockRequest(int Quantity);
 public record DeductRequest(int Quantity);
-public record CreateInventoryRequest(int ProductId, string ProductName, int QuantityOnHand, int ReorderLevel, string WarehouseLocation);
