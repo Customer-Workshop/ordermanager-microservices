@@ -27,6 +27,9 @@ builder.Services.AddHttpClient<InventorySvc>(client =>
     client.BaseAddress = new Uri(productServiceUrl);
 });
 
+// Add health checks
+builder.Services.AddHealthChecks();
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {
