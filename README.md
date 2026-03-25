@@ -1,8 +1,8 @@
-# Microservices — OrderManager Decomposition
+# Inventory Service
 
 A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith).
 
-## Services
+## API Endpoints
 
 This microservice owns the **Inventory** bounded context:
 
@@ -15,7 +15,10 @@ This microservice owns the **Inventory** bounded context:
 | `POST /api/inventory/product/{id}/deduct` | Deduct stock (called by monolith) |
 | `GET /health` | Health check endpoint |
 
-## See Also
+### Prerequisites
+- .NET 8 SDK
+- Node.js 18+
+- Angular CLI
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript

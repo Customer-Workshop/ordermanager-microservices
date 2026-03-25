@@ -1,8 +1,5 @@
 replicaCount: 1
 
-image:
-  tag: dev-latest
-
 ingress:
   hosts:
     - host: inventory-dev.workshop.local
@@ -10,19 +7,13 @@ ingress:
         - path: /
           pathType: Prefix
 
+autoscaling:
+  enabled: false
+
 resources:
-  requests:
-    cpu: 50m
-    memory: 128Mi
   limits:
     cpu: 250m
-    memory: 256Mi
-
-env:
-  - name: ASPNETCORE_ENVIRONMENT
-    value: Development
-  - name: ConnectionStrings__DefaultConnection
-    value: "Data Source=inventory.db"
-
-persistence:
-  enabled: false
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
