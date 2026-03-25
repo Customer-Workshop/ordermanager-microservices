@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
@@ -8,9 +7,9 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly InventoryBusinessService _inventoryService;
+    private readonly InventoryManagementService _inventoryService;
 
-    public InventoryController(InventoryBusinessService inventoryService)
+    public InventoryController(InventoryManagementService inventoryService)
     {
         _inventoryService = inventoryService;
     }
@@ -55,4 +54,35 @@ public class InventoryController : ControllerBase
             return Conflict(new { error = ex.Message });
         }
     }
+
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
+
+    [HttpGet("product/{productId}/check")]
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
+    {
+        var available = await _inventoryService.CheckStockAsync(productId, quantity);
+        return Ok(new { productId, quantity, available });
+    }
+
+    [HttpPost("product/{productId}/deduct")]
+    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
+    {
+        try
+        {
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+    }
 }
+
+public record RestockRequest(int Quantity);
+public record DeductRequest(int Quantity);

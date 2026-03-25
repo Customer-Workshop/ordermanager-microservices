@@ -112,10 +112,8 @@ public class InventoryItemService
 
     public async Task DeleteInventoryItemAsync(int id)
     {
-        var item = await _context.InventoryItems.FindAsync(id)
-            ?? throw new ArgumentException($"Inventory item {id} not found");
-
-        _context.InventoryItems.Remove(item);
-        await _context.SaveChangesAsync();
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 }
