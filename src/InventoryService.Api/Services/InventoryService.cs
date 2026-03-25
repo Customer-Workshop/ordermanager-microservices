@@ -46,10 +46,11 @@ public class InventoryItemService
         return item;
     }
 
-    public async Task<int> GetStockLevelAsync(int productId)
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item?.QuantityOnHand ?? 0;
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 
     public async Task<List<InventoryItem>> GetLowStockItemsAsync()

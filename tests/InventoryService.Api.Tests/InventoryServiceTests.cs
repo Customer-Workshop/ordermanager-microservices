@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 using InventoryService.Api.Data;
 using InventoryService.Api.Models;
 using InventoryService.Api.Services;
-using Xunit;
 
 namespace InventoryService.Api.Tests;
 
@@ -36,9 +36,9 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(1);
-        Assert.NotNull(item);
-        Assert.Equal("Widget A", item.ProductName);
+        var result = await service.GetInventoryByProductIdAsync(1);
+        Assert.NotNull(result);
+        Assert.Equal("Widget A", result.ProductName);
     }
 
     [Fact]

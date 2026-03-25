@@ -1,8 +1,8 @@
-# Microservices — Decomposed from OrderManager Monolith
+# Inventory Microservice
 
 A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts.
 
-### Run tests
+## Architecture
 
 | Component | Description |
 |-----------|-------------|
@@ -52,9 +52,9 @@ The API will be available at `https://localhost:5001`.
 dotnet test
 ```
 
-The API will be available at `http://localhost:5000`.
+The application will be available at `http://localhost:5000`.
 
-## Infrastructure
+### Run tests
 
 - **Dockerfile**: `docker/Dockerfile`
 - **Helm chart**: `helm/inventory-service/`

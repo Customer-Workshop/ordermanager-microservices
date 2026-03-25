@@ -1,9 +1,6 @@
-## .NET
 bin/
 obj/
-*.db
 *.user
-*.userosscache
 *.suo
 
 ## Node
@@ -18,6 +15,3 @@ dist/
 ## OS
 .DS_Store
 Thumbs.db
-
-## Build output
-wwwroot/
