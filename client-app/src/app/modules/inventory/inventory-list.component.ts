@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inventory-list',
@@ -40,15 +41,7 @@ import { FormsModule } from '@angular/forms';
         </tr>
       </tbody>
     </table>
-    <div *ngIf="!items.length">No inventory items found.</div>
-
-    <h3>Low Stock Items</h3>
-    <ul>
-      <li *ngFor="let i of lowStockItems">
-        {{i.productName}} - {{i.quantityOnHand}} remaining (reorder level: {{i.reorderLevel}})
-      </li>
-    </ul>
-    <div *ngIf="!lowStockItems.length">No low stock items.</div>
+    <p *ngIf="!items.length">Loading inventory...</p>
   `
 })
 export class InventoryListComponent implements OnInit {
@@ -67,7 +60,6 @@ export class InventoryListComponent implements OnInit {
   loadLowStock() {
     this.http.get<any[]>(`${this.apiUrl}/api/inventory/low-stock`).subscribe(data => this.items = data);
   }
-
   restock(productId: number) {
     this.http.post(`${this.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: this.restockQty })
       .subscribe(() => this.loadAll());
