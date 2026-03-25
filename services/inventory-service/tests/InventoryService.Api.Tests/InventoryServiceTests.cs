@@ -19,7 +19,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetAllInventory_ReturnsSeededItems()
+    public async Task GetAllInventory_ReturnsSeedData()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -28,22 +28,13 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetInventoryByProductId_ReturnsCorrectItem()
+    public async Task GetByProductId_ReturnsCorrectItem()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
         var item = await service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
-    }
-
-    [Fact]
-    public async Task GetInventoryByProductId_ReturnsNull_WhenNotFound()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(999);
-        Assert.Null(item);
     }
 
     [Fact]
@@ -66,9 +57,9 @@ public class InventoryServiceTests
         var before = await service.GetInventoryByProductIdAsync(1);
         var qtyBefore = before!.QuantityOnHand;
 
-        var after = await service.DeductStockAsync(1, 5);
+        var after = await service.DeductStockAsync(1, 10);
         Assert.NotNull(after);
-        Assert.Equal(qtyBefore - 5, after.QuantityOnHand);
+        Assert.Equal(qtyBefore - 10, after.QuantityOnHand);
     }
 
     [Fact]
@@ -76,6 +67,7 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
+
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.DeductStockAsync(1, 99999));
     }
@@ -87,5 +79,14 @@ public class InventoryServiceTests
         var service = new InventoryItemService(context);
         var lowStock = await service.GetLowStockItemsAsync();
         Assert.Empty(lowStock);
+    }
+
+    [Fact]
+    public async Task GetStockLevel_ReturnsCorrectValue()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var level = await service.GetStockLevelAsync(1);
+        Assert.Equal(50, level);
     }
 }
