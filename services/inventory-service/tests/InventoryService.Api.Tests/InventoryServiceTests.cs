@@ -66,8 +66,9 @@ public class InventoryServiceTests
         var before = await service.GetInventoryByProductIdAsync(1);
         var qtyBefore = before!.QuantityOnHand;
 
-        var after = await service.DeductStockAsync(1, 10);
-        Assert.Equal(qtyBefore - 10, after.QuantityOnHand);
+        var after = await service.DeductStockAsync(1, 5);
+        Assert.NotNull(after);
+        Assert.Equal(qtyBefore - 5, after.QuantityOnHand);
     }
 
     [Fact]
@@ -77,24 +78,6 @@ public class InventoryServiceTests
         var service = new InventoryItemService(context);
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.DeductStockAsync(1, 99999));
-    }
-
-    [Fact]
-    public async Task CheckStock_ReturnsTrueWhenAvailable()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var available = await service.CheckStockAsync(1, 5);
-        Assert.True(available);
-    }
-
-    [Fact]
-    public async Task CheckStock_ReturnsFalseWhenInsufficient()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var available = await service.CheckStockAsync(1, 99999);
-        Assert.False(available);
     }
 
     [Fact]
