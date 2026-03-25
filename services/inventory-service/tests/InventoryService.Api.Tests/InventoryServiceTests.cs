@@ -2,9 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Xunit;
 using InventoryService.Api.Data;
-using InventoryService.Api.Services;
-using Xunit;
-using InventoryService.Api.Data;
 using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
@@ -20,8 +17,8 @@ public class InventoryServiceTests
             .Options;
         var context = new InventoryDbContext(options);
         context.InventoryItems.AddRange(
-            new InventoryItem { Id = 1, ProductId = 1, ProductName = "Widget A", Sku = "WGT-001", QuantityOnHand = 50, ReorderLevel = 10, WarehouseLocation = "A-01" },
-            new InventoryItem { Id = 2, ProductId = 2, ProductName = "Widget B", Sku = "WGT-002", QuantityOnHand = 5, ReorderLevel = 10, WarehouseLocation = "A-02" }
+            new InventoryItem { Id = 1, ProductId = 1, ProductName = "Widget A", QuantityOnHand = 50, ReorderLevel = 10, WarehouseLocation = "A-01" },
+            new InventoryItem { Id = 2, ProductId = 2, ProductName = "Widget B", QuantityOnHand = 5, ReorderLevel = 10, WarehouseLocation = "A-02" }
         );
         context.SaveChanges();
         return context;

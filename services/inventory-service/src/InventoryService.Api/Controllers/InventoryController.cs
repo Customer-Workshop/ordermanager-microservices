@@ -49,6 +49,4 @@ public class InventoryController : ControllerBase
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
-    [HttpGet("low-stock")]
-    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
