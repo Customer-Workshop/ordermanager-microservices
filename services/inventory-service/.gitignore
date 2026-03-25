@@ -9,7 +9,6 @@ obj/
 ## Node
 node_modules/
 dist/
-.angular/
 
 ## IDE
 .idea/
