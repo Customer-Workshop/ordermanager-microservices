@@ -2,6 +2,7 @@
 bin/
 obj/
 *.user
+*.userosscache
 *.suo
 *.cache
 *.dll
@@ -21,3 +22,6 @@ dist/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Build output
+wwwroot/

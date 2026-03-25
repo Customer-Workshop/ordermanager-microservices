@@ -2,7 +2,7 @@
 
 Decomposed microservices from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Each service is independently deployable and conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
-## Services
+## Architecture
 
 ### Inventory Service
 
@@ -30,6 +30,12 @@ dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 **Run tests:**
 ```bash
 cd services/inventory-service
+
+# Restore and run the API
+dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+
+# Run tests
 dotnet test
 ```
 

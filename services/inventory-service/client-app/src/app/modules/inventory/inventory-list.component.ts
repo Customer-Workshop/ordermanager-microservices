@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inventory-list',
@@ -20,7 +19,6 @@ import { environment } from '../../../environments/environment';
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
           <td>{{i.productName}}</td>
-          <td>{{i.sku}}</td>
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
@@ -42,7 +40,7 @@ export class InventoryListComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.loadInventory();
+    this.loadItems();
   }
 
   loadInventory() {

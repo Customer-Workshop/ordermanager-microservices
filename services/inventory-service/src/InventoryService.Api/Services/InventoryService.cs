@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryItemService
+public class InventoryBusinessService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryItemService(InventoryDbContext context)
+    public InventoryBusinessService(InventoryDbContext context)
     {
         _context = context;
     }
