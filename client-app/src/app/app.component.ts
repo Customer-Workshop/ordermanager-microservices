@@ -9,7 +9,6 @@ import { RouterOutlet, RouterLink } from '@angular/router';
     <nav>
       <h1>Inventory Service</h1>
       <a routerLink="/inventory">Inventory</a>
-      <a routerLink="/low-stock">Low Stock</a>
     </nav>
     <router-outlet></router-outlet>
   `
