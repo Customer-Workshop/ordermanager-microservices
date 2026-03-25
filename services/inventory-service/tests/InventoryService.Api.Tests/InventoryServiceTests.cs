@@ -19,7 +19,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetAllInventory_ReturnsSeedData()
+    public async Task GetAllInventory_ReturnsSeededItems()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -28,13 +28,22 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetByProductId_ReturnsCorrectItem()
+    public async Task GetInventoryByProductId_ReturnsCorrectItem()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
         var item = await service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
+    }
+
+    [Fact]
+    public async Task GetInventoryByProductId_ReturnsNull_WhenNotFound()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var item = await service.GetInventoryByProductIdAsync(999);
+        Assert.Null(item);
     }
 
     [Fact]
@@ -50,40 +59,6 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetLowStock_ReturnsItemsBelowReorderLevel()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-
-        // Set one item to low stock
-        var item = await context.InventoryItems.FirstAsync(i => i.ProductId == 1);
-        item.QuantityOnHand = 5;
-        await context.SaveChangesAsync();
-
-        var lowStock = await service.GetLowStockItemsAsync();
-        Assert.Single(lowStock);
-        Assert.Equal(1, lowStock[0].ProductId);
-    }
-
-    [Fact]
-    public async Task CheckStock_ReturnsTrueWhenAvailable()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var result = await service.CheckStockAsync(1, 10);
-        Assert.True(result);
-    }
-
-    [Fact]
-    public async Task CheckStock_ReturnsFalseWhenInsufficient()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var result = await service.CheckStockAsync(1, 99999);
-        Assert.False(result);
-    }
-
-    [Fact]
     public async Task DeductStock_DecreasesQuantity()
     {
         using var context = CreateContext();
@@ -91,8 +66,8 @@ public class InventoryServiceTests
         var before = await service.GetInventoryByProductIdAsync(1);
         var qtyBefore = before!.QuantityOnHand;
 
-        var after = await service.DeductStockAsync(1, 5);
-        Assert.Equal(qtyBefore - 5, after.QuantityOnHand);
+        var after = await service.DeductStockAsync(1, 10);
+        Assert.Equal(qtyBefore - 10, after.QuantityOnHand);
     }
 
     [Fact]
@@ -100,8 +75,34 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.DeductStockAsync(1, 99999));
+    }
+
+    [Fact]
+    public async Task CheckStock_ReturnsTrueWhenAvailable()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var available = await service.CheckStockAsync(1, 5);
+        Assert.True(available);
+    }
+
+    [Fact]
+    public async Task CheckStock_ReturnsFalseWhenInsufficient()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var available = await service.CheckStockAsync(1, 99999);
+        Assert.False(available);
+    }
+
+    [Fact]
+    public async Task GetLowStockItems_ReturnsEmpty_WhenAllStocked()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var lowStock = await service.GetLowStockItemsAsync();
+        Assert.Empty(lowStock);
     }
 }

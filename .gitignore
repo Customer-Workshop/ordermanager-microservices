@@ -1,17 +1,10 @@
-## .NET
 bin/
 obj/
-*.db
-
-## Node
+*.user
+*.suo
+.vs/
 node_modules/
 dist/
-
-## IDE
-.vs/
-.vscode/
-*.swp
-
-## OS
-.DS_Store
-Thumbs.db
+.angular/
+*.db
+appsettings.Development.json
