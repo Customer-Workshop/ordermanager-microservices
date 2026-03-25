@@ -37,6 +37,9 @@ public class InventoryItemService
     /// <exception cref="ArgumentException">No inventory record for the product.</exception>
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;
@@ -50,6 +53,9 @@ public class InventoryItemService
     /// <exception cref="InvalidOperationException">Thrown when insufficient stock is available.</exception>
     public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null)
             return null;
@@ -75,6 +81,9 @@ public class InventoryItemService
     /// <returns>True if stock was successfully reserved; false if insufficient stock.</returns>
     public async Task<bool> ReserveStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            return false;
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null || item.QuantityOnHand < quantity)
             return false;
