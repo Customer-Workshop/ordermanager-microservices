@@ -19,7 +19,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetAllInventory_ReturnsSeedData()
+    public async Task GetAllInventory_ReturnsSeededItems()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);

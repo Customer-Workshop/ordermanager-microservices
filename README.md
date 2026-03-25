@@ -2,7 +2,7 @@
 
 Decomposed inventory microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). This is the **"after"** state for the monolith-to-microservices decomposition workshop.
 
-## Architecture
+## Services
 
 The inventory-service owns all inventory concerns that were previously embedded in the monolith:
 
@@ -24,14 +24,7 @@ The inventory-service owns all inventory concerns that were previously embedded 
 - **CI/CD**: GitHub Actions → ECR → ArgoCD sync
 - **Monitoring**: Prometheus ServiceMonitor
 
-## Getting Started
-
-### Prerequisites
-- .NET 8 SDK
-- Node.js 18+
-- Angular CLI (`npm install -g @angular/cli`)
-
-### Run locally
+#### Running Locally
 
 ```bash
 # Restore and run .NET API
@@ -67,7 +60,7 @@ argocd/                       # ArgoCD application manifests
 .github/workflows/            # CI/CD pipeline
 ```
 
-## Platform Conformance
+## License
 
 This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
 - Deploys into `decomposition-dev` / `decomposition-staging` namespaces
