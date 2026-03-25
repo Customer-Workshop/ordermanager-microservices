@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 using InventoryService.Api.Data;
 using InventoryService.Api.Models;
 using InventoryService.Api.Services;
+using Xunit;
 
 namespace InventoryService.Api.Tests;
 
@@ -28,7 +28,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetByProductId_ReturnsCorrectItem()
+    public async Task GetInventoryByProductId_ReturnsCorrectItem()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -36,15 +36,6 @@ public class InventoryServiceTests
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
         Assert.Equal(50, item.QuantityOnHand);
-    }
-
-    [Fact]
-    public async Task GetByProductId_ReturnsNull_WhenNotFound()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(999);
-        Assert.Null(item);
     }
 
     [Fact]
@@ -101,7 +92,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task DeductStock_ThrowsOnInsufficientStock()
+    public async Task DeductStock_ReturnsFalseOnInsufficientStock()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);

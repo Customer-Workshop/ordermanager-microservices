@@ -26,7 +26,6 @@ import { environment } from '../../../environments/environment';
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">No inventory items found.</p>
   `
 })
 export class InventoryListComponent implements OnInit {
