@@ -5,13 +5,24 @@ obj/
 *.user
 *.suo
 .vs/
+*.DotSettings.user
 
-## Node
+## Node / Angular
 node_modules/
 dist/
-wwwroot/
+.angular/
+npm-debug.log*
 
 ## IDE
 .idea/
 .vscode/
 *.swp
+*.swo
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Build
+publish/
+out/
