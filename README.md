@@ -59,6 +59,7 @@ A standalone .NET 8 Web API + Angular 17 microservice responsible for managing p
 
 ### Run Locally
 
+**Run locally:**
 ```bash
 # Restore and run the API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj

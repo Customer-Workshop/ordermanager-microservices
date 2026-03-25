@@ -13,12 +13,8 @@ import { environment } from '../../../environments/environment';
     <table *ngIf="items.length">
       <thead>
         <tr>
-          <th>Product</th>
-          <th>On Hand</th>
-          <th>Reorder Level</th>
-          <th>Location</th>
-          <th>Last Restocked</th>
-          <th>Actions</th>
+          <th>Product</th><th>SKU</th><th>On Hand</th><th>Reorder Level</th>
+          <th>Location</th><th>Last Restocked</th><th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -29,8 +25,8 @@ import { environment } from '../../../environments/environment';
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty">
-            <button class="btn btn-primary" (click)="restock(i.productId)">Restock</button>
+            <input type="number" [(ngModel)]="restockQuantities[i.productId]" placeholder="Qty" min="1" style="width:60px">
+            <button (click)="restock(i.productId)">Restock</button>
           </td>
         </tr>
       </tbody>
@@ -51,8 +47,7 @@ import { environment } from '../../../environments/environment';
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  lowStockItems: any[] = [];
-  restockQuantities: { [productId: number]: number } = {};
+  restockQuantities: { [key: number]: number } = {};
 
   constructor(private http: HttpClient) {}
 
@@ -65,16 +60,13 @@ export class InventoryListComponent implements OnInit {
     this.http.get<any[]>(`${environment.apiUrl}/api/inventory`).subscribe(data => this.items = data);
   }
 
-  loadLowStock() {
-    this.http.get<any[]>(`${environment.apiUrl}/api/inventory/low-stock`).subscribe(data => this.lowStockItems = data);
-  }
-
   restock(productId: number) {
-    const qty = this.restockQuantities[productId] || 1;
-    this.http.post(`${environment.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: qty })
+    const quantity = this.restockQuantities[productId];
+    if (!quantity || quantity <= 0) return;
+    this.http.post(`${environment.apiUrl}/api/inventory/product/${productId}/restock`, { quantity })
       .subscribe(() => {
+        this.restockQuantities[productId] = 0;
         this.loadInventory();
-        this.loadLowStock();
       });
   }
 }
