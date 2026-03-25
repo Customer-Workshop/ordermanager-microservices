@@ -9,16 +9,9 @@ obj/
 ## Node
 node_modules/
 dist/
-.angular/
+wwwroot/
 
 ## IDE
 .idea/
 .vscode/
 *.swp
-
-## OS
-.DS_Store
-Thumbs.db
-
-## Build output
-wwwroot/
