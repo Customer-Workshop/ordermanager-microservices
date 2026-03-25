@@ -1,33 +1,28 @@
 # Inventory Microservice
 
-A .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). This service owns all inventory domain logic: stock levels, warehouse locations, restocking, and low-stock alerts.
+A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder thresholds.
 
 ## Architecture
 
-| Component | Description |
-|-----------|-------------|
-| **API** | .NET 8 Web API with EF Core + SQLite |
-| **Frontend** | Angular 17 standalone components |
-| **IaC** | Helm chart, ArgoCD manifests, GitHub Actions CI/CD |
+| Component | Technology |
+|-----------|-----------|
+| **Backend** | .NET 8, C#, Entity Framework Core, SQLite |
+| **Frontend** | Angular 17, TypeScript |
+| **API** | RESTful with Swagger/OpenAPI |
+| **Container** | Multi-stage Docker build (Alpine) |
+| **Orchestration** | Kubernetes via Helm + ArgoCD |
+| **CI/CD** | GitHub Actions, ECR, ArgoCD sync |
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
 | POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by order service) |
+| POST | `/api/inventory/product/{productId}/reserve` | Reserve stock (used by monolith order flow) |
 | GET | `/api/inventory/low-stock` | List items at or below reorder level |
 | GET | `/health` | Health check endpoint |
-
-## Tech Stack
-
-- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
-- **Frontend**: Angular 17, TypeScript
-- **Container**: Multi-stage Docker build (Alpine)
-- **Orchestration**: Helm, ArgoCD, HPA
-- **CI/CD**: GitHub Actions, Amazon ECR
 
 ## Getting Started
 
@@ -36,30 +31,39 @@ A .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](ht
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run the application
+### Run locally
 
 ```bash
-# Restore .NET dependencies
-dotnet restore
-
-# Install Angular dependencies
-cd client-app && npm install && cd ..
-
-# Run the API
+dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 ```
-
-The API will be available at `http://localhost:5000`.
 
 ### Run tests
 
 ```bash
-dotnet test
+dotnet test --verbosity normal
 ```
 
-## Deployment
+## Project Structure
 
-See `helm/`, `argocd/`, and `.github/workflows/` for deployment configuration.
+```
+src/InventoryService.Api/       # .NET 8 Web API
+client-app/                     # Angular 17 frontend
+docker/Dockerfile               # Multi-stage container build
+helm/inventory-service/         # Helm chart
+argocd/                         # ArgoCD Application manifests (dev, staging)
+.github/workflows/              # CI/CD pipeline
+tests/                          # xUnit test project
+```
+
+## Platform Conformance
+
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
+- Deploys into `decomposition-dev` / `decomposition-staging` namespaces
+- Network policies follow default-deny with explicit allow rules
+- ServiceMonitor for Prometheus metrics scraping
+- HPA for horizontal pod autoscaling
+- ArgoCD-driven GitOps deployments
 
 ## License
 
