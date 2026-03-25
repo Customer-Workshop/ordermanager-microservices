@@ -25,6 +25,13 @@ Manages stock levels, warehouse locations, and reorder thresholds. Provides a st
 cd services/inventory-service
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+
+The API will be available at `https://localhost:5001`.
+
+### Run Tests
+
+```bash
+dotnet test
 ```
 
 **Run tests:**
