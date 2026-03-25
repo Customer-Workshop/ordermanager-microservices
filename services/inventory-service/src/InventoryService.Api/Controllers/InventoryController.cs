@@ -7,9 +7,9 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly InventoryItemService _inventoryService;
+    private readonly InventoryManagementService _inventoryService;
 
-    public InventoryController(InventoryItemService inventoryService)
+    public InventoryController(InventoryManagementService inventoryService)
     {
         _inventoryService = inventoryService;
     }
@@ -38,12 +38,22 @@ public class InventoryController : ControllerBase
         }
     }
 
-    [HttpPost("product/{productId}/decrement")]
-    public async Task<IActionResult> Decrement(int productId, [FromBody] DecrementRequest request)
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
+
+    [HttpGet("product/{productId}/check")]
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
+    {
+        var available = await _inventoryService.CheckStockAsync(productId, quantity);
+        return Ok(new { productId, quantity, available });
+    }
+
+    [HttpPost("product/{productId}/deduct")]
+    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
         try
         {
-            var item = await _inventoryService.DecrementStockAsync(productId, request.Quantity);
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return Ok(item);
         }
         catch (ArgumentException ex)
@@ -55,10 +65,7 @@ public class InventoryController : ControllerBase
             return Conflict(new { error = ex.Message });
         }
     }
-
-    [HttpGet("low-stock")]
-    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
 
 public record RestockRequest(int Quantity);
-public record DecrementRequest(int Quantity);
+public record DeductRequest(int Quantity);

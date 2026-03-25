@@ -14,6 +14,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
@@ -30,6 +31,6 @@ app.UseSwaggerUI();
 app.UseCors();
 app.UseStaticFiles();
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+app.MapHealthChecks("/health");
 app.MapFallbackToFile("index.html");
 app.Run();

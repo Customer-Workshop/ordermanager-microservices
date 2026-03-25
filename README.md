@@ -1,34 +1,28 @@
 # Inventory Microservice
 
-A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts.
+Standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts independently.
 
 ## Architecture
 
-| Component | Description |
-|-----------|-------------|
-| **Backend** | .NET 8 Web API with EF Core + SQLite |
-| **Frontend** | Angular 17 standalone components |
-| **API** | RESTful with Swagger/OpenAPI + health endpoint |
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | .NET 8 Web API, EF Core, SQLite |
+| **Frontend** | Angular 17, TypeScript |
+| **Container** | Multi-stage Docker build |
+| **Orchestration** | Helm chart, ArgoCD, HPA |
+| **CI/CD** | GitHub Actions → ECR → ArgoCD sync |
 
-### API Endpoints
+## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
 | GET | `/api/inventory/product/{id}` | Get inventory for a product |
 | POST | `/api/inventory/product/{id}/restock` | Restock a product |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (called by OrderManager) |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/health` | Health check |
-
-#### API Endpoints
-
-- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
-- **Frontend**: Angular 17, TypeScript
-- **Container**: Multi-stage Docker build (Node + .NET SDK + ASP.NET runtime)
-- **Orchestration**: Kubernetes (Helm chart), ArgoCD, HPA
-- **CI/CD**: GitHub Actions -> ECR -> ArgoCD sync
-- **Monitoring**: Prometheus ServiceMonitor
+| GET | `/api/inventory/low-stock` | List items below reorder level |
+| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
+| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith) |
+| GET | `/health` | Health check endpoint |
 
 ## Getting Started
 
@@ -37,37 +31,47 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager 
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run Locally
+### Run locally
 
 ```bash
-# Restore and run
+# Restore and run API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
-The API will be available at `https://localhost:5001`.
+# Install and build Angular client
+cd client-app && npm install && npm run build && cd ..
+```
 
-### Run Tests
+### Run tests
 
 ```bash
 dotnet test
 ```
 
-The application will be available at `http://localhost:5000`.
+## Project Structure
 
-### Run tests
-
-- **Dockerfile**: `docker/Dockerfile`
-- **Helm chart**: `helm/inventory-service/`
-- **ArgoCD manifests**: `argocd/`
-- **CI/CD pipeline**: `.github/workflows/build-push.yaml`
+```
+src/InventoryService.Api/     # .NET 8 Web API
+  Controllers/                # REST controllers
+  Models/                     # EF Core entity models
+  Services/                   # Business logic
+  Data/                       # DbContext and seed data
+client-app/                   # Angular 17 frontend
+docker/Dockerfile             # Multi-stage container build
+helm/inventory-service/       # Helm chart
+argocd/                       # ArgoCD application manifests
+.github/workflows/            # CI/CD pipeline
+tests/                        # Unit tests
+```
 
 ## Platform Conformance
 
 This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-- Deploys to `decomposition-dev` / `decomposition-staging` namespaces
-- Network policies: default-deny with explicit allow from ingress-nginx, ordermanager, and monitoring
-- Prometheus ServiceMonitor for observability
-- ArgoCD automated sync with prune and self-heal
+- Network policies (default-deny + explicit allow)
+- Prometheus ServiceMonitor for metrics
+- HPA for autoscaling
+- ArgoCD GitOps deployment
+- cert-manager TLS annotations
 
 ## License
 

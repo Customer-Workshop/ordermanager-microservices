@@ -16,7 +16,8 @@ public class InventoryDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.ProductId).IsUnique();
             entity.Property(e => e.ProductName).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.WarehouseLocation).HasMaxLength(100);
+            entity.Property(e => e.Sku).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.Sku).IsUnique();
         });
     }
 }

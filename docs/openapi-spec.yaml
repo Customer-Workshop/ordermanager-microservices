@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  title: Inventory Service API
+  version: v1
+  description: |
+    Microservice responsible for managing product inventory, stock levels,
+    warehouse locations, and reorder alerts. Decomposed from the OrderManager monolith.
+
+    ## Overview
+    The Inventory Service provides a RESTful API for:
+    - Querying inventory levels by product
+    - Restocking products
+    - Checking stock availability (used by Order service)
+    - Deducting stock during order fulfillment
+    - Monitoring low-stock alerts
+
+    ## Authentication
+    Currently no authentication is required. In production, requests should
+    be authenticated via the platform's service mesh (Istio/Linkerd) or
+    API gateway.
+  contact:
+    name: Platform Engineering Team
+
+servers:
+  - url: http://localhost:5002
+    description: Local development
+  - url: https://inventory-service-dev.workshop.local
+    description: Development environment
+  - url: https://inventory-service-staging.workshop.local
+    description: Staging environment
+
+paths:
+  /api/inventory:
+    get:
+      summary: Get all inventory items
+      operationId: getAllInventory
+      tags: [Inventory]
+      responses:
+        '200':
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+    post:
+      summary: Create a new inventory item
+      operationId: createInventoryItem
+      tags: [Inventory]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInventoryItemRequest'
+      responses:
+        '201':
+          description: Created inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '409':
+          description: Inventory record already exists for this product
+
+  /api/inventory/{id}:
+    get:
+      summary: Get inventory item by ID
+      operationId: getInventoryById
+      tags: [Inventory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '404':
+          description: Item not found
+    patch:
+      summary: Update an existing inventory item
+      operationId: updateInventoryItem
+      tags: [Inventory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInventoryItemRequest'
+      responses:
+        '200':
+          description: Updated inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '404':
+          description: Item not found
+    delete:
+      summary: Delete an inventory item
+      operationId: deleteInventoryItem
+      tags: [Inventory]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Item deleted
+        '404':
+          description: Item not found
+
+  /api/inventory/product/{productId}:
+    get:
+      summary: Get inventory by product ID
+      operationId: getInventoryByProduct
+      tags: [Inventory]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The inventory item for the product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '404':
+          description: No inventory record for this product
+
+  /api/inventory/product/{productId}/restock:
+    post:
+      summary: Restock a product
+      operationId: restockProduct
+      tags: [Inventory]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestockRequest'
+      responses:
+        '200':
+          description: Updated inventory item after restock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '400':
+          description: Invalid quantity or product not found
+
+  /api/inventory/product/{productId}/deduct:
+    post:
+      summary: Deduct stock for a product
+      operationId: deductStock
+      tags: [Inventory]
+      description: Used by the Order service during order creation to reserve stock.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestockRequest'
+      responses:
+        '200':
+          description: Updated inventory item after deduction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+        '400':
+          description: Insufficient stock or invalid request
+
+  /api/inventory/low-stock:
+    get:
+      summary: Get low stock items
+      operationId: getLowStock
+      tags: [Inventory]
+      description: Returns items where quantity on hand is at or below the reorder level.
+      responses:
+        '200':
+          description: List of low stock items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+
+  /api/inventory/stock-check:
+    post:
+      summary: Check stock availability
+      operationId: checkStock
+      tags: [Inventory]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockCheckRequest'
+      responses:
+        '200':
+          description: Stock check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockCheckResponse'
+
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: healthCheck
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is healthy
+
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        productId:
+          type: integer
+          example: 1
+        productName:
+          type: string
+          example: "Widget A"
+        productSku:
+          type: string
+          example: "WGT-001"
+        quantityOnHand:
+          type: integer
+          example: 50
+        reorderLevel:
+          type: integer
+          example: 10
+        warehouseLocation:
+          type: string
+          example: "A-01"
+        lastRestocked:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+
+    CreateInventoryItemRequest:
+      type: object
+      required: [productId, productName, productSku, quantityOnHand, reorderLevel, warehouseLocation]
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        productSku:
+          type: string
+        quantityOnHand:
+          type: integer
+        reorderLevel:
+          type: integer
+        warehouseLocation:
+          type: string
+
+    UpdateInventoryItemRequest:
+      type: object
+      properties:
+        quantityOnHand:
+          type: integer
+          nullable: true
+        reorderLevel:
+          type: integer
+          nullable: true
+        warehouseLocation:
+          type: string
+          nullable: true
+
+    RestockRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+
+    StockCheckRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId:
+          type: integer
+        quantity:
+          type: integer
+
+    StockCheckResponse:
+      type: object
+      properties:
+        productId:
+          type: integer
+        available:
+          type: boolean
+        quantityOnHand:
+          type: integer

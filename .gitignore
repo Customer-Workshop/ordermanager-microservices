@@ -1,17 +1,17 @@
+## .NET
 bin/
 obj/
+*.db
 *.user
 *.suo
+.vs/
 
 ## Node
 node_modules/
 dist/
+wwwroot/
 
 ## IDE
 .idea/
 .vscode/
 *.swp
-
-## OS
-.DS_Store
-Thumbs.db

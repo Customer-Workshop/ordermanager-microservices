@@ -19,14 +19,6 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}
-    - from:
-        - namespaceSelector: {}
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: ordermanager
-      ports:
-        - protocol: TCP
-          port: {{ .Values.service.targetPort }}
     {{- if .Values.monitoring.enabled }}
     - from:
         - namespaceSelector:
@@ -36,6 +28,13 @@ spec:
         - protocol: TCP
           port: {{ .Values.monitoring.port }}
     {{- end }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
   egress:
     - to: []
       ports:
