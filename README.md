@@ -1,79 +1,57 @@
-# Microservices — Decomposed from OrderManager Monolith
+# Inventory Service — Microservice
 
-Microservices decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Each service is independently deployable and conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
+[![Build](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-microservices/actions/workflows/build-push.yaml/badge.svg)](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-microservices/actions)
 
-## Services
+Standalone .NET 8 Web API + Angular 17 frontend for inventory management, decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
-### inventory-service
+| Component | Tech | Description |
+|-----------|------|-------------|
+| **API** | .NET 8, EF Core, SQLite | REST API with Swagger/OpenAPI documentation |
+| **Frontend** | Angular 17 | Standalone components for inventory management |
+| **Docker** | Multi-stage | Node 20 → .NET 8 SDK → ASP.NET 8 Alpine runtime |
+| **Helm** | v0.1.0 | Deployment, service, ingress, HPA, network policy, service monitor |
+| **ArgoCD** | GitOps | Application manifests for dev and staging |
+| **CI/CD** | GitHub Actions | Build, test, push to ECR, trigger ArgoCD sync |
 
-Standalone .NET 8 Web API + Angular 17 frontend for inventory management (stock levels, warehouse locations, reorder alerts).
-
-| Component | Description |
-|-----------|-------------|
-| **API** | .NET 8 Web API with EF Core (SQLite), Swagger/OpenAPI |
-| **Frontend** | Angular 17 standalone components |
-| **Docker** | Multi-stage build (Node → .NET SDK → ASP.NET runtime) |
-| **Helm** | Kubernetes deployment, service, network policy, HPA, service monitor |
-| **ArgoCD** | Application manifests for dev and staging environments |
-| **CI/CD** | GitHub Actions pipeline — build, test, push to ECR, ArgoCD sync |
-
-#### Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/inventory` | List all inventory items |
-| `GET` | `/api/inventory/product/{productId}` | Get inventory by product ID |
-| `POST` | `/api/inventory/product/{productId}/restock` | Restock a product |
-| `POST` | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
-| `GET` | `/api/inventory/low-stock` | List low-stock items |
-| `GET` | `/health` | Health check |
-
-#### Quick Start
+## Quick Start
 
 ```bash
-cd services/inventory-service
-
-# Restore and run
+# Restore and build
 dotnet restore
+dotnet build
+
+# Run the API (http://localhost:5000)
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
-### Run tests
-
-```bash
+# Run tests
 dotnet test --verbosity normal
 ```
 
-### Docker Build
+### Docker
 
 ```bash
 docker build -f docker/Dockerfile -t inventory-service:local .
 docker run -p 8080:8080 inventory-service:local
 
-# Verify at http://localhost:8080/health
+# Verify
+curl http://localhost:8080/health
+curl http://localhost:8080/swagger
 ```
-
-## Configuration
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `ConnectionStrings:DefaultConnection` | `Data Source=inventory.db` | SQLite connection string |
-| `ASPNETCORE_ENVIRONMENT` | `Development` | Runtime environment |
-| `ASPNETCORE_URLS` | `http://+:8080` (Docker) | Listen URL |
 
 ## API Reference
 
-Full API documentation: [`docs/api-specification.md`](docs/api-specification.md)
+Interactive docs available at **`/swagger`** when the service is running. OpenAPI spec: [`docs/openapi-spec.yaml`](docs/openapi-spec.yaml).
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/inventory` | List all inventory items |
-| `GET` | `/api/inventory/product/{productId}` | Get inventory by product ID |
-| `POST` | `/api/inventory/product/{productId}/restock` | Add stock to a product |
-| `POST` | `/api/inventory/product/{productId}/reserve` | Reserve stock (used by monolith) |
-| `GET` | `/api/inventory/low-stock` | Get items below reorder level |
-| `GET` | `/health` | Kubernetes health probe |
+| Method | Endpoint | Description | Success | Error |
+|--------|----------|-------------|---------|-------|
+| `GET` | `/api/inventory` | List all inventory items | `200` | — |
+| `GET` | `/api/inventory/product/{productId}` | Get inventory by product ID | `200` | `404` |
+| `POST` | `/api/inventory/product/{productId}/restock` | Add stock to a product | `200` | `400` |
+| `POST` | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by Order service) | `200` | `409` |
+| `GET` | `/api/inventory/low-stock` | Items at or below reorder level | `200` | — |
+| `GET` | `/health` | Kubernetes health probe | `200` | — |
 
-### Quick Examples
+### Examples
 
 ```bash
 # List all inventory
@@ -87,8 +65,8 @@ curl -X POST http://localhost:5000/api/inventory/product/1/restock \
   -H "Content-Type: application/json" \
   -d '{"quantity": 25}' | jq .
 
-# Reserve 5 units of product 1 (used by order service)
-curl -X POST http://localhost:5000/api/inventory/product/1/reserve \
+# Deduct 5 units (called by Order service during checkout)
+curl -X POST http://localhost:5000/api/inventory/product/1/deduct \
   -H "Content-Type: application/json" \
   -d '{"quantity": 5}' | jq .
 
@@ -96,87 +74,82 @@ curl -X POST http://localhost:5000/api/inventory/product/1/reserve \
 curl http://localhost:5000/api/inventory/low-stock | jq .
 ```
 
+### Data Model
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `int` | Auto-generated primary key |
+| `productId` | `int` | Foreign key to Product catalog (unique index) |
+| `productName` | `string` | Denormalized product name (max 200 chars) |
+| `quantityOnHand` | `int` | Current stock level |
+| `reorderLevel` | `int` | Threshold that triggers low-stock alert (default: 10) |
+| `warehouseLocation` | `string` | Physical location code (e.g., A-01) |
+| `lastRestocked` | `datetime` | UTC timestamp of last restock |
+
+## Configuration
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `ConnectionStrings:DefaultConnection` | `Data Source=inventory.db` | SQLite connection string |
+| `ASPNETCORE_ENVIRONMENT` | `Development` | Runtime environment |
+| `ASPNETCORE_URLS` | `http://+:8080` (Docker) | Listen URL |
+
+## Architecture
+
+The monolith's in-process inventory calls are replaced with HTTP calls to this service's `/api/inventory` endpoints. The monolith uses a typed `InventoryServiceClient` (`HttpClient`) for communication.
+
+See [`docs/architecture.md`](docs/architecture.md) for the full Architecture Decision Record including design trade-offs, layer diagrams, and deployment topology.
+
+See [`docs/deployment.md`](docs/deployment.md) for Kubernetes deployment instructions, Helm values, health check configuration, network policies, and troubleshooting.
+
 ## Project Structure
 
 ```
 .
-├── .github/workflows/          # CI/CD pipelines
-│   ├── build-push.yaml         # Docker build + ECR push
-│   └── inventory-service-ci.yaml # PR build + test
-├── argocd/                     # ArgoCD application manifests
-│   ├── application-dev.yaml
-│   └── application-staging.yaml
-├── client-app/                 # Angular 17 frontend
-│   ├── src/app/modules/inventory/
-│   │   ├── inventory-list.component.ts
-│   │   ├── low-stock.component.ts
-│   │   ├── inventory.model.ts
-│   │   └── inventory.service.ts
-│   └── ...
+├── .github/workflows/
+│   └── build-push.yaml             # CI/CD: build, test, push to ECR, ArgoCD sync
+├── argocd/
+│   ├── application-dev.yaml         # ArgoCD app manifest (dev)
+│   └── application-staging.yaml     # ArgoCD app manifest (staging)
+├── client-app/                      # Angular 17 frontend
+│   └── src/app/modules/inventory/
+│       ├── inventory-list.component.ts
+│       └── low-stock.component.ts
 ├── docker/
-│   └── Dockerfile              # Multi-stage build (Node → .NET SDK → Alpine runtime)
+│   └── Dockerfile                   # Multi-stage build (Node → .NET SDK → Alpine runtime)
 ├── docs/
-│   ├── api-specification.md    # Detailed API reference
-│   ├── architecture.md         # Architecture decision record
-│   └── deployment.md           # Deployment and operations guide
-├── helm/inventory-service/     # Helm chart
+│   ├── architecture.md              # Architecture Decision Record
+│   ├── deployment.md                # Deployment & operations guide
+│   └── openapi-spec.yaml            # OpenAPI 3.0 specification
+├── helm/inventory-service/
 │   ├── Chart.yaml
-│   ├── templates/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   ├── ingress.yaml
-│   │   ├── hpa.yaml
-│   │   ├── networkpolicy.yaml
-│   │   └── servicemonitor.yaml
-│   ├── values.yaml             # Base values
-│   ├── values-dev.yaml         # Dev overrides
-│   └── values-staging.yaml     # Staging overrides
-├── src/InventoryService.Api/   # .NET 8 Web API
-│   ├── Controllers/
-│   │   └── InventoryController.cs
-│   ├── Data/
-│   │   ├── InventoryDbContext.cs
-│   │   └── SeedData.cs
-│   ├── Models/
-│   │   ├── InventoryItem.cs
-│   │   └── RestockRequest.cs
-│   ├── Services/
-│   │   └── InventoryItemService.cs
+│   ├── templates/                   # deployment, service, ingress, hpa, networkpolicy, servicemonitor
+│   ├── values.yaml                  # Base values
+│   ├── values-dev.yaml              # Dev overrides (1 replica, no HPA)
+│   └── values-staging.yaml          # Staging overrides (2 replicas, HPA 2-4)
+├── src/InventoryService.Api/
+│   ├── Controllers/InventoryController.cs
+│   ├── Data/InventoryDbContext.cs
+│   ├── Data/SeedData.cs
+│   ├── Models/InventoryItem.cs
+│   ├── Services/InventoryService.cs
 │   └── Program.cs
 ├── tests/InventoryService.Api.Tests/
+│   └── InventoryServiceTests.cs     # 9 xUnit tests
 ├── InventoryService.sln
 └── README.md
 ```
 
-The API will be available at `http://localhost:5000` with Swagger UI at `/swagger`.
+## Platform Compliance
 
-## Architecture
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
 
-The monolith's in-process inventory calls are replaced with HTTP calls to the inventory-service `/api/inventory` endpoints. The monolith uses an `InventoryHttpClient` to communicate with this service.
-
-## License
-
-All services conform to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-
-- Namespace isolation with resource quotas
-- Network policies (default-deny with explicit allow rules)
-- Prometheus ServiceMonitor for metrics
-- ArgoCD GitOps deployments
-- NGINX Ingress with cert-manager TLS
-
-## Repository Structure
-
-```
-services/
-  inventory-service/
-    src/InventoryService.Api/     # .NET 8 Web API
-    tests/                        # xUnit tests
-    client-app/                   # Angular 17 frontend
-    docker/Dockerfile             # Multi-stage build
-    helm/inventory-service/       # Helm chart (deployment, service, networkpolicy, servicemonitor, hpa)
-    argocd/                       # ArgoCD application manifests (dev, staging)
-.github/workflows/                # CI/CD pipeline
-```
+- Namespace isolation with resource quotas (`decomposition-dev`, `decomposition-staging`)
+- Network policies (default-deny with explicit ingress/egress rules)
+- Prometheus ServiceMonitor for `/metrics` scraping
+- ArgoCD GitOps deployments with auto-sync
+- NGINX Ingress with cert-manager TLS (letsencrypt-staging)
+- Horizontal Pod Autoscaler (staging: 2–4 replicas)
 
 ## License
 
