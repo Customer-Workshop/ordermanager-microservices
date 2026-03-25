@@ -43,9 +43,7 @@ public class InventoryItemService
     public async Task<bool> CheckAndDeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity)
-            return false;
-
+        if (item is null || item.QuantityOnHand < quantity) return false;
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return true;
