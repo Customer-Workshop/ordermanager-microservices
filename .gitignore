@@ -4,7 +4,6 @@ obj/
 *.db
 *.user
 *.suo
-*.cache
 .vs/
 
 ## Node
@@ -16,7 +15,3 @@ dist/
 .idea/
 .vscode/
 *.swp
-
-## OS
-.DS_Store
-Thumbs.db
