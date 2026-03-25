@@ -3,6 +3,9 @@ bin/
 obj/
 *.user
 *.suo
+*.cache
+*.dll
+*.pdb
 *.db
 *.db-shm
 *.db-wal
@@ -13,8 +16,6 @@ dist/
 .angular/
 
 ## IDE
-.vs/
-.vscode/
 .idea/
 
 ## OS

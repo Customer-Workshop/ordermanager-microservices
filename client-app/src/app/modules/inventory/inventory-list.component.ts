@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <h2>Inventory</h2>
+    <h2>Inventory Management</h2>
     <table *ngIf="items.length">
       <thead>
         <tr>
