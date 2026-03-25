@@ -8,12 +8,10 @@ import { RouterOutlet, RouterLink } from '@angular/router';
   template: `
     <nav>
       <h1>Inventory Service</h1>
-      <a routerLink="/inventory">All Items</a>
+      <a routerLink="/inventory">Inventory</a>
       <a routerLink="/low-stock">Low Stock</a>
     </nav>
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
+    <router-outlet></router-outlet>
   `
 })
 export class AppComponent {
