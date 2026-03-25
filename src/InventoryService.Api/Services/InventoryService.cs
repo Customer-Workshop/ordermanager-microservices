@@ -45,39 +45,6 @@ public class InventoryItemService
         return item;
     }
 
-    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
-            ?? throw new ArgumentException($"No inventory record for product {productId}");
-
-        if (item.QuantityOnHand < quantity)
-            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
-
-        item.QuantityOnHand -= quantity;
-        await _context.SaveChangesAsync();
-        return item;
-    }
-
-    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
-    {
-        return await _context.InventoryItems
-            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
-            .ToListAsync();
-    }
-
-    /// <summary>Checks stock availability and decrements quantity for an order.</summary>
-    /// <returns>True if stock was successfully reserved; false if insufficient stock.</returns>
-    public async Task<bool> ReserveStockAsync(int productId, int quantity)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity)
-            return false;
-
-        item.QuantityOnHand -= quantity;
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
     /// <summary>Deducts stock for a product and returns the updated inventory item.</summary>
     /// <returns>The updated inventory item after deduction, or null if product not found.</returns>
     /// <exception cref="InvalidOperationException">Thrown when insufficient stock is available.</exception>
@@ -93,5 +60,27 @@ public class InventoryItemService
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    /// <summary>Retrieves items whose stock level is at or below the reorder threshold.</summary>
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    {
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .OrderBy(i => i.QuantityOnHand)
+            .ToListAsync();
+    }
+
+    /// <summary>Checks stock availability and decrements quantity for an order.</summary>
+    /// <returns>True if stock was successfully reserved; false if insufficient stock.</returns>
+    public async Task<bool> ReserveStockAsync(int productId, int quantity)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        if (item is null || item.QuantityOnHand < quantity)
+            return false;
+
+        item.QuantityOnHand -= quantity;
+        await _context.SaveChangesAsync();
+        return true;
     }
 }
