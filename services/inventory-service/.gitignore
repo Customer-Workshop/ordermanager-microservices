@@ -1,0 +1,10 @@
+bin/
+obj/
+*.db
+*.user
+*.suo
+.vs/
+node_modules/
+dist/
+.angular/
+wwwroot/
