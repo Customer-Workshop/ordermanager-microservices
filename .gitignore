@@ -1,10 +1,7 @@
-## .NET
 bin/
 obj/
 *.db
 *.user
-*.suo
-*.cache
 .vs/
 *.DotSettings.user
 
