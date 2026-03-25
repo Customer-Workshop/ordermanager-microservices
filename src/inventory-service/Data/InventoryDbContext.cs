@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using InventoryService.Api.Models;
+using InventoryService.Models;
 
-namespace InventoryService.Api.Data;
+namespace InventoryService.Data;
 
 public class InventoryDbContext : DbContext
 {
@@ -14,10 +14,8 @@ public class InventoryDbContext : DbContext
         modelBuilder.Entity<InventoryItem>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.ProductId).IsUnique();
             entity.Property(e => e.ProductName).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.ProductSku).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.WarehouseLocation).HasMaxLength(50);
+            entity.HasIndex(e => e.ProductId).IsUnique();
         });
     }
 }
