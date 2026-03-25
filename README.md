@@ -1,36 +1,30 @@
-# Inventory Service
+# Inventory Microservice
 
-A .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). This service owns all inventory management concerns: stock levels, warehouse locations, reorder thresholds, and stock deduction/restocking.
+A standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder thresholds.
 
 ## Architecture
 
-| Concern | Description |
-|---------|-------------|
-| **Stock Levels** | Track quantity on hand per product |
-| **Warehouse Locations** | Map products to warehouse locations |
-| **Reorder Alerts** | Flag items at or below reorder level |
-| **Restock / Deduct** | HTTP endpoints for stock operations |
+This microservice owns the **Inventory** bounded context:
 
-The service has its own SQLite database and is independently deployable.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/inventory` | GET | List all inventory items |
+| `/api/inventory/product/{id}` | GET | Get inventory for a product |
+| `/api/inventory/product/{id}/restock` | POST | Restock a product |
+| `/api/inventory/product/{id}/deduct` | POST | Deduct stock (called by Order service) |
+| `/api/inventory/low-stock` | GET | List items at or below reorder level |
+| `/api/inventory` | POST | Create a new inventory record |
+| `/health` | GET | Health check |
 
 ## Tech Stack
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript
 - **API**: RESTful with Swagger/OpenAPI
-- **Container**: Multi-stage Docker build (Node + .NET SDK + aspnet runtime)
-- **Orchestration**: Helm chart, ArgoCD, HPA, NetworkPolicy, ServiceMonitor
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
-| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by OrderManager) |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/health` | Health check |
+- **Container**: Multi-stage Docker build
+- **Orchestration**: Kubernetes (Helm chart)
+- **GitOps**: ArgoCD
+- **CI/CD**: GitHub Actions
 
 ## Getting Started
 
@@ -52,18 +46,32 @@ cd client-app && npm install && cd ..
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 ```
 
-The application will be available at `http://localhost:5000`.
+The application will be available at `https://localhost:5001`.
 
-## IaC
+### Run tests
 
-- **Dockerfile**: `docker/Dockerfile` — multi-stage build
-- **Helm chart**: `helm/inventory-service/` — deployment, service, ingress, network policy, service monitor, HPA
-- **ArgoCD**: `argocd/` — application manifests for dev and staging
-- **CI/CD**: `ci/build-push.yaml` — GitHub Actions pipeline
+```bash
+dotnet test
+```
 
-## Monolith Integration
+## Infrastructure
 
-The OrderManager monolith calls this service via HTTP to check and deduct inventory during order creation, replacing the previous in-process `InventoryService` dependency.
+| Path | Description |
+|------|-------------|
+| `docker/Dockerfile` | Multi-stage build (Angular + .NET + runtime) |
+| `helm/inventory-service/` | Helm chart with deployment, service, network policy, HPA, service monitor |
+| `argocd/` | ArgoCD Application manifests for dev and staging |
+| `.github/workflows/` | CI/CD pipeline — build, test, push to ECR |
+
+## Platform Conformance
+
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
+
+- Deploys into `decomposition-dev` / `decomposition-staging` namespaces
+- Network policies allow ingress from `ingress-nginx` and `monitoring` namespaces
+- ServiceMonitor for Prometheus scraping
+- HPA for autoscaling in staging
+- ArgoCD automated sync with prune and self-heal
 
 ## License
 
