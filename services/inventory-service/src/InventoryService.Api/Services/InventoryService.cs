@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryBusinessService
+public class InventoryItemService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryBusinessService(InventoryDbContext context)
+    public InventoryItemService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -33,14 +33,7 @@ public class InventoryBusinessService
         return item;
     }
 
-    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
-    {
-        return await _context.InventoryItems
-            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
-            .ToListAsync();
-    }
-
-    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
+    public async Task<InventoryItem> DecrementStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
@@ -51,5 +44,12 @@ public class InventoryBusinessService
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    {
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 }
