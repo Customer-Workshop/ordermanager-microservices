@@ -68,7 +68,6 @@ cd client-app && npm install && cd ..
 
 # Run the API (serves Angular app too)
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-```
 
 The service will be available at `https://localhost:5001`. Swagger UI at `https://localhost:5001/swagger`.
 

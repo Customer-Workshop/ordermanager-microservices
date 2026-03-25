@@ -28,6 +28,13 @@ spec:
         - protocol: TCP
           port: {{ .Values.monitoring.port }}
     {{- end }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
   egress:
     - to: []
       ports:
