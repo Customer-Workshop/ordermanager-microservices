@@ -1,15 +1,13 @@
-## .NET
 bin/
 obj/
-*.db
 *.user
 *.suo
 .vs/
-
-## Node
 node_modules/
 dist/
 .angular/
+*.db
+appsettings.Development.json
 
 ## Build output
 **/wwwroot/
