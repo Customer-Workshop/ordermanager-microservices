@@ -25,16 +25,12 @@ public class InventoryItemService
     }
 
     /// <summary>Looks up the inventory record for a single product.</summary>
-    /// <param name="productId">The product identifier.</param>
     public async Task<InventoryItem?> GetInventoryByProductIdAsync(int productId)
     {
         return await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
     }
 
-    /// <summary>Adds <paramref name="quantity"/> units to the product's stock.</summary>
-    /// <param name="productId">The product to restock.</param>
-    /// <param name="quantity">Number of units to add.</param>
-    /// <exception cref="ArgumentException">No inventory record for the product.</exception>
+    /// <summary>Adds units to the product's stock.</summary>
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
@@ -45,7 +41,21 @@ public class InventoryItemService
         return item;
     }
 
-    /// <summary>Returns items whose <c>QuantityOnHand</c> is at or below their <c>ReorderLevel</c>.</summary>
+    /// <summary>Deducts stock, throwing on insufficient quantity.</summary>
+    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
+            ?? throw new ArgumentException($"No inventory record for product {productId}");
+
+        if (item.QuantityOnHand < quantity)
+            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
+
+        item.QuantityOnHand -= quantity;
+        await _context.SaveChangesAsync();
+        return item;
+    }
+
+    /// <summary>Returns items at or below their reorder level.</summary>
     public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
         return await _context.InventoryItems
@@ -53,13 +63,7 @@ public class InventoryItemService
             .ToListAsync();
     }
 
-    /// <summary>
-    /// Atomically checks stock availability and deducts the requested quantity.
-    /// Used by the Order service during checkout.
-    /// </summary>
-    /// <param name="productId">The product identifier.</param>
-    /// <param name="quantity">The quantity to deduct.</param>
-    /// <returns><c>true</c> if stock was successfully deducted; <c>false</c> if insufficient.</returns>
+    /// <summary>Checks stock and deducts if sufficient. Returns true on success.</summary>
     public async Task<bool> CheckAndDeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
@@ -67,17 +71,5 @@ public class InventoryItemService
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return true;
-    }
-
-    /// <summary>Deducts stock and returns the updated item, or <c>null</c> if insufficient.</summary>
-    /// <param name="productId">The product identifier.</param>
-    /// <param name="quantity">The quantity to deduct.</param>
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity) return null;
-        item.QuantityOnHand -= quantity;
-        await _context.SaveChangesAsync();
-        return item;
     }
 }

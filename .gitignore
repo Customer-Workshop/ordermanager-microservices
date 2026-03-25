@@ -1,22 +1,9 @@
-## .NET
 bin/
 obj/
+*.db
 *.user
 *.suo
 .vs/
-
-## Node
 node_modules/
 dist/
 .angular/
-
-## IDE
-.vs/
-.vscode/
-.idea/
-*.swp
-*.swo
-
-## OS
-.DS_Store
-Thumbs.db
