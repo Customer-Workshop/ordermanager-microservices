@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryItemService
+public class InventoryBusinessService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryItemService(InventoryDbContext context)
+    public InventoryBusinessService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -33,10 +33,10 @@ public class InventoryItemService
         return item;
     }
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null) return null;
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
+            ?? throw new ArgumentException($"No inventory record for product {productId}");
         if (item.QuantityOnHand < quantity)
             throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
         item.QuantityOnHand -= quantity;
@@ -51,9 +51,9 @@ public class InventoryItemService
             .ToListAsync();
     }
 
-    public async Task<int> GetStockLevelAsync(int productId)
+    public async Task<bool> CheckStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item?.QuantityOnHand ?? 0;
+        return item is not null && item.QuantityOnHand >= quantity;
     }
 }
