@@ -14,4 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\InventoryService.Api\InventoryService.Api.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
 </Project>

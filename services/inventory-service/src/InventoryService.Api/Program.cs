@@ -7,17 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=inventory.db"));
 
-builder.Services.AddScoped<InventoryBusinessService>();
+builder.Services.AddScoped<InventoryItemService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
-
-builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -30,6 +29,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors();
+app.UseStaticFiles();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapFallbackToFile("index.html");
 app.Run();
