@@ -47,13 +47,6 @@ public class InventoryController : ControllerBase
             return Conflict(new { error = ex.Message });
         }
     }
-
-    [HttpGet("product/{productId}/stock-level")]
-    public async Task<IActionResult> GetStockLevel(int productId)
-    {
-        var level = await _inventoryService.GetStockLevelAsync(productId);
-        return Ok(new { productId, quantityOnHand = level });
-    }
 }
 
 public record RestockRequest(int Quantity);

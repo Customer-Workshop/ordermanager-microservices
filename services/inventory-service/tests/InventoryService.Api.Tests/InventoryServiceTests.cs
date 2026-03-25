@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 using InventoryService.Api.Data;
 using InventoryService.Api.Models;
 using InventoryService.Api.Services;
+using Xunit;
 
 namespace InventoryService.Api.Tests;
 
@@ -38,6 +38,15 @@ public class InventoryServiceTests
     }
 
     [Fact]
+    public async Task GetByProductId_ReturnsNull_WhenNotFound()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var item = await service.GetInventoryByProductIdAsync(999);
+        Assert.Null(item);
+    }
+
+    [Fact]
     public async Task Restock_IncreasesQuantity()
     {
         using var context = CreateContext();
@@ -47,6 +56,30 @@ public class InventoryServiceTests
 
         var after = await service.RestockAsync(1, 25);
         Assert.Equal(qtyBefore + 25, after.QuantityOnHand);
+    }
+
+    [Fact]
+    public async Task Restock_ThrowsForUnknownProduct()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.RestockAsync(999, 10));
+    }
+
+    [Fact]
+    public async Task GetLowStock_ReturnsItemsBelowReorderLevel()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+
+        // All seed items have qty >= 50, reorder level = 10, so none should be low
+        var lowStock = await service.GetLowStockItemsAsync();
+        Assert.Empty(lowStock);
+
+        // Deduct stock to make one item low
+        await service.DeductStockAsync(1, 45);
+        lowStock = await service.GetLowStockItemsAsync();
+        Assert.Single(lowStock);
     }
 
     [Fact]
@@ -67,39 +100,15 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.DeductStockAsync(1, 99999));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.DeductStockAsync(1, 99999));
     }
 
     [Fact]
-    public async Task GetLowStockItems_ReturnsItemsBelowReorderLevel()
+    public async Task DeductStock_ReturnsNull_WhenNotFound()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-
-        // Deduct stock to make an item low
-        await service.DeductStockAsync(1, 45); // 50 - 45 = 5, below reorder level 10
-
-        var lowStock = await service.GetLowStockItemsAsync();
-        Assert.Contains(lowStock, i => i.ProductId == 1);
-    }
-
-    [Fact]
-    public async Task GetStockLevel_ReturnsCorrectLevel()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var level = await service.GetStockLevelAsync(1);
-        Assert.Equal(50, level);
-    }
-
-    [Fact]
-    public async Task GetStockLevel_ReturnsZeroForUnknownProduct()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var level = await service.GetStockLevelAsync(9999);
-        Assert.Equal(0, level);
+        var result = await service.DeductStockAsync(999, 10);
+        Assert.Null(result);
     }
 }

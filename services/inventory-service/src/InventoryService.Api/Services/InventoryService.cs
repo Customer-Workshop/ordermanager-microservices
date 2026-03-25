@@ -44,18 +44,10 @@ public class InventoryItemService
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null) return null;
-
         if (item.QuantityOnHand < quantity)
             throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
-
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
-    }
-
-    public async Task<int> GetStockLevelAsync(int productId)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item?.QuantityOnHand ?? 0;
     }
 }
