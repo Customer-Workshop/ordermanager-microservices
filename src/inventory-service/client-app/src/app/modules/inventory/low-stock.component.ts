@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { InventoryApiService, InventoryItem } from '../../services/inventory.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-low-stock',
@@ -26,15 +27,15 @@ import { InventoryApiService, InventoryItem } from '../../services/inventory.ser
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">No low stock items. All inventory levels are healthy.</p>
+    <p *ngIf="!items.length">All items are sufficiently stocked.</p>
   `
 })
 export class LowStockComponent implements OnInit {
-  items: InventoryItem[] = [];
+  items: any[] = [];
 
-  constructor(private inventoryService: InventoryApiService) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.inventoryService.getLowStock().subscribe(data => this.items = data);
+    this.http.get<any[]>(`${environment.apiUrl}/api/inventory/low-stock`).subscribe(data => this.items = data);
   }
 }

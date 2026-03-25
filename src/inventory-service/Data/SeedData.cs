@@ -1,6 +1,6 @@
-using InventoryService.Api.Models;
+using InventoryService.Models;
 
-namespace InventoryService.Api.Data;
+namespace InventoryService.Data;
 
 public static class SeedData
 {

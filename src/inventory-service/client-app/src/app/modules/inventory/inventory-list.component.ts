@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InventoryApiService, InventoryItem } from '../../services/inventory.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inventory-list',
@@ -38,20 +39,21 @@ import { InventoryApiService, InventoryItem } from '../../services/inventory.ser
   `
 })
 export class InventoryListComponent implements OnInit {
-  items: InventoryItem[] = [];
+  items: any[] = [];
   restockQty = 10;
 
-  constructor(private inventoryService: InventoryApiService) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.loadInventory();
   }
 
   loadInventory() {
-    this.inventoryService.getAll().subscribe(data => this.items = data);
+    this.http.get<any[]>(`${environment.apiUrl}/api/inventory`).subscribe(data => this.items = data);
   }
 
   restock(productId: number) {
-    this.inventoryService.restock(productId, this.restockQty).subscribe(() => this.loadInventory());
+    this.http.post(`${environment.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: this.restockQty })
+      .subscribe(() => this.loadInventory());
   }
 }

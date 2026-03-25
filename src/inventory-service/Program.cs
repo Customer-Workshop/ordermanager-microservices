@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using InventoryService.Api.Data;
-using InventoryService.Api.Services;
+using InventoryService.Data;
+using InventoryService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +17,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<InventoryDbContext>();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
