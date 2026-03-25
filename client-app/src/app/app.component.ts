@@ -10,9 +10,7 @@ import { RouterOutlet } from '@angular/router';
       <h1>Inventory Service</h1>
       <a href="/inventory">Inventory</a>
     </nav>
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
+    <router-outlet></router-outlet>
   `
 })
 export class AppComponent {

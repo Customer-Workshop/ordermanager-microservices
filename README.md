@@ -1,6 +1,6 @@
 # Inventory Microservice
 
-Standalone inventory management microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
+A standalone .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder alerts.
 
 ## Architecture
 
@@ -13,7 +13,15 @@ Standalone inventory management microservice decomposed from the [OrderManager m
 | **ArgoCD** | GitOps application manifests for dev and staging |
 | **CI/CD** | GitHub Actions — build, test, push to ECR, trigger ArgoCD sync |
 
-## API Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/inventory` | GET | List all inventory items |
+| `/api/inventory/product/{id}` | GET | Get inventory for a specific product |
+| `/api/inventory/product/{id}/restock` | POST | Restock a product |
+| `/api/inventory/product/{id}/check` | GET | Check stock availability |
+| `/api/inventory/product/{id}/deduct` | POST | Deduct stock (called by order-service) |
+| `/api/inventory/low-stock` | GET | List items at or below reorder level |
+| `/health` | GET | Health check endpoint |
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
