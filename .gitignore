@@ -9,6 +9,10 @@ obj/
 ## Node
 node_modules/
 dist/
+.angular/
+
+## Build output
+**/wwwroot/
 
 ## IDE
 .idea/
