@@ -42,6 +42,7 @@ public class InventoryController : ControllerBase
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
     [HttpPost("product/{productId}/decrement")]
+    [HttpPost("product/{productId}/deduct")]
     public async Task<IActionResult> Decrement(int productId, [FromBody] DecrementRequest request)
     {
         try
