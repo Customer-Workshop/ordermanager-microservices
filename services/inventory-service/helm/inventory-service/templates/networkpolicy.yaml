@@ -20,10 +20,12 @@ spec:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}
     - from:
-        - namespaceSelector: {}
-          podSelector:
+        - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/name: ordermanager
+              kubernetes.io/metadata.name: decomposition-dev
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: decomposition-staging
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}

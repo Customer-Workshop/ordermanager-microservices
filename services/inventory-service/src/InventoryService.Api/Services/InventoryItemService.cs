@@ -33,27 +33,23 @@ public class InventoryItemService
         return item;
     }
 
-    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
-        return await _context.InventoryItems
-            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
-            .ToListAsync();
-    }
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
+            ?? throw new ArgumentException($"No inventory record for product {productId}");
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null) return null;
         if (item.QuantityOnHand < quantity)
             throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
+
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
     }
 
-    public async Task<int> GetStockLevelAsync(int productId)
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item?.QuantityOnHand ?? 0;
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 }
