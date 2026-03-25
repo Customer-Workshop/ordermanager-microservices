@@ -7,9 +7,9 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly InventoryManagementService _inventoryService;
+    private readonly InventoryItemService _inventoryService;
 
-    public InventoryController(InventoryManagementService inventoryService)
+    public InventoryController(InventoryItemService inventoryService)
     {
         _inventoryService = inventoryService;
     }
@@ -34,25 +34,13 @@ public class InventoryController : ControllerBase
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
-    [HttpGet("product/{productId}/check")]
-    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
-    {
-        var available = await _inventoryService.CheckStockAsync(productId, quantity);
-        return Ok(new { productId, quantity, available });
-    }
-
     [HttpPost("product/{productId}/deduct")]
     public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
-        try
-        {
-            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { error = ex.Message });
-        }
+        var success = await _inventoryService.CheckAndDeductStockAsync(productId, request.Quantity);
+        if (!success)
+            return Conflict(new { message = $"Insufficient stock for product {productId}" });
+        return Ok(new { message = "Stock deducted successfully" });
     }
 }
 

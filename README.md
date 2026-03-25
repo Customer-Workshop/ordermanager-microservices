@@ -37,7 +37,9 @@ cd services/inventory-service
 dotnet restore
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
-# Run tests
+### Run tests
+
+```bash
 dotnet test
 ```
 
@@ -47,7 +49,7 @@ The API will be available at `http://localhost:5000` with Swagger UI at `/swagge
 
 The monolith's in-process inventory calls are replaced with HTTP calls to the inventory-service `/api/inventory` endpoints. The monolith uses an `InventoryHttpClient` to communicate with this service.
 
-## Platform Conformance
+## License
 
 All services conform to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
 

@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryManagementService
+public class InventoryItemService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryManagementService(InventoryDbContext context)
+    public InventoryItemService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -40,20 +40,19 @@ public class InventoryManagementService
             .ToListAsync();
     }
 
-    public async Task<bool> CheckStockAsync(int productId, int quantity)
+    public async Task<bool> CheckAndDeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item is not null && item.QuantityOnHand >= quantity;
+        if (item is null || item.QuantityOnHand < quantity) return false;
+        item.QuantityOnHand -= quantity;
+        await _context.SaveChangesAsync();
+        return true;
     }
 
-    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
+    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
-            ?? throw new ArgumentException($"No inventory record for product {productId}");
-
-        if (item.QuantityOnHand < quantity)
-            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
-
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        if (item is null || item.QuantityOnHand < quantity) return null;
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
