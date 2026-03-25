@@ -1,36 +1,29 @@
-# Inventory Service
+# Inventory Microservice
 
-A .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). This service owns all inventory management concerns: stock levels, warehouse locations, reorder thresholds, and stock deduction/restocking.
+A .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder alerts independently.
 
 ## Architecture
 
-| Concern | Description |
-|---------|-------------|
-| **Stock Levels** | Track quantity on hand per product |
-| **Warehouse Locations** | Map products to warehouse locations |
-| **Reorder Alerts** | Flag items at or below reorder level |
-| **Restock / Deduct** | HTTP endpoints for stock operations |
-
-The service has its own SQLite database and is independently deployable.
-
-## Tech Stack
-
-- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
-- **Frontend**: Angular 17, TypeScript
-- **API**: RESTful with Swagger/OpenAPI
-- **Container**: Multi-stage Docker build (Node + .NET SDK + aspnet runtime)
-- **Orchestration**: Helm chart, ArgoCD, HPA, NetworkPolicy, ServiceMonitor
+| Component | Technology |
+|-----------|-----------|
+| **Backend** | .NET 8 Web API, EF Core, SQLite |
+| **Frontend** | Angular 17, standalone components |
+| **Container** | Multi-stage Docker build |
+| **Orchestration** | Kubernetes via Helm + ArgoCD |
+| **Monitoring** | Prometheus ServiceMonitor |
+| **CI/CD** | GitHub Actions -> ECR -> ArgoCD |
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a product |
-| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by OrderManager) |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/health` | Health check |
+| GET | `/api/inventory/product/{id}` | Get inventory for a product |
+| POST | `/api/inventory/product/{id}/restock` | Restock a product |
+| GET | `/api/inventory/low-stock` | List low-stock items |
+| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
+| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by order-service) |
+| GET | `/health` | Health check endpoint |
 
 ## Getting Started
 
@@ -39,32 +32,34 @@ The service has its own SQLite database and is independently deployable.
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run the application
+### Run locally
 
 ```bash
-# Restore .NET dependencies
+# Restore and run API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
-
-# Install Angular dependencies
-cd client-app && npm install && cd ..
-
-# Run the API (serves Angular app too)
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+
+# Install and build Angular client
+cd client-app && npm install && npm run build && cd ..
+
+# Run tests
+dotnet test
 ```
 
-The application will be available at `http://localhost:5000`.
+The API will be available at `http://localhost:5000` with Swagger UI.
 
-## IaC
+## Infrastructure
 
-- **Dockerfile**: `docker/Dockerfile` — multi-stage build
-- **Helm chart**: `helm/inventory-service/` — deployment, service, ingress, network policy, service monitor, HPA
-- **ArgoCD**: `argocd/` — application manifests for dev and staging
-- **CI/CD**: `ci/build-push.yaml` — GitHub Actions pipeline
+- **Dockerfile**: `docker/Dockerfile` — multi-stage build (Node + .NET SDK + runtime)
+- **Helm chart**: `helm/inventory-service/` — deployment, service, network policy, HPA, service monitor
+- **ArgoCD**: `argocd/` — application manifests for dev and staging environments
+- **CI/CD**: `.github/workflows/build-push.yaml` — build, test, push to ECR
 
-## Monolith Integration
+## Platform Conformance
 
-The OrderManager monolith calls this service via HTTP to check and deduct inventory during order creation, replacing the previous in-process `InventoryService` dependency.
-
-## License
-
-MIT
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
+- Deploys to `decomposition-dev` / `decomposition-staging` namespaces
+- Network policies restrict traffic to ingress-nginx and monitoring namespaces
+- Prometheus metrics exposed via ServiceMonitor
+- Health check endpoint at `/health`
+- Container images stored in ECR (`workshop/inventory-service`)
