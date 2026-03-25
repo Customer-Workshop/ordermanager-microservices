@@ -16,7 +16,7 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
   hosts:
-    - host: inventory-service.workshop.local
+    - host: inventory.workshop.local
       paths:
         - path: /
           pathType: Prefix
