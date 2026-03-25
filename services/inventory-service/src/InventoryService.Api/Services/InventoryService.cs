@@ -52,4 +52,10 @@ public class InventoryBusinessService
         await _context.SaveChangesAsync();
         return item;
     }
+
+    public async Task<int> GetStockLevelAsync(int productId)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return item?.QuantityOnHand ?? 0;
+    }
 }
