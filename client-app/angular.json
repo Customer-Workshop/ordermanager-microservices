@@ -7,15 +7,42 @@
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
+      "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../src/InventoryService.Api/wwwroot",
+            "outputPath": "dist/client-app",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "tsConfig": "tsconfig.app.json"
-          }
+            "tsConfig": "tsconfig.app.json",
+            "assets": [],
+            "styles": [],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "500kb", "maximumError": "1mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "2kb", "maximumError": "4kb" }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "client-app:build:production" },
+            "development": { "buildTarget": "client-app:build:development" }
+          },
+          "defaultConfiguration": "development"
         }
       }
     }

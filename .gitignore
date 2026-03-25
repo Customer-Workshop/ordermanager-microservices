@@ -3,7 +3,6 @@ bin/
 obj/
 *.db
 *.user
-*.userosscache
 *.suo
 *.cache
 *.db-journal
@@ -21,9 +20,8 @@ dist/
 appsettings.Development.json
 
 ## IDE
-.vs/
-.vscode/
 .idea/
+.vscode/
 *.swp
 
 ## OS

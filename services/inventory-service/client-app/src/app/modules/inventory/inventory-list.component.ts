@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InventoryApiService, InventoryItem } from '../../services/inventory.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -28,7 +28,7 @@ import { FormsModule } from '@angular/forms';
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty" style="width:60px">
+            <input type="number" [(ngModel)]="restockQty" min="1" placeholder="Qty" style="width:60px">
             <button (click)="restock(i.productId)">Restock</button>
           </td>
         </tr>
@@ -38,22 +38,20 @@ import { FormsModule } from '@angular/forms';
   `
 })
 export class InventoryListComponent implements OnInit {
-  items: any[] = [];
-  restockQuantities: { [key: number]: number } = {};
+  items: InventoryItem[] = [];
+  restockQty = 10;
 
-  constructor(private http: HttpClient) {}
+  constructor(private inventoryService: InventoryApiService) {}
 
   ngOnInit() {
     this.loadInventory();
   }
 
   loadInventory() {
-    this.http.get<any[]>('/api/inventory').subscribe(data => this.items = data);
+    this.inventoryService.getAll().subscribe(data => this.items = data);
   }
 
   restock(productId: number) {
-    const qty = this.restockQuantities[productId] || 1;
-    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: qty })
-      .subscribe(() => this.loadInventory());
+    this.inventoryService.restock(productId, this.restockQty).subscribe(() => this.loadInventory());
   }
 }

@@ -4,18 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - "services/inventory-service/**"
+      - 'services/inventory-service/**'
   pull_request:
     branches: [main]
     paths:
-      - "services/inventory-service/**"
+      - 'services/inventory-service/**'
 
 env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 599083837640.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: workshop/inventory-service
   IMAGE_TAG: ${{ github.sha }}
-  SERVICE_PATH: services/inventory-service
+  SERVICE_DIR: services/inventory-service
 
 jobs:
   build-and-test:
@@ -23,15 +23,14 @@ jobs:
     defaults:
       run:
         working-directory: services/inventory-service
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: '8.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -44,7 +43,7 @@ jobs:
 
   build-and-push:
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -65,8 +64,13 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        working-directory: services/inventory-service
+        working-directory: ${{ env.SERVICE_PATH }}
         run: |
           docker build -f docker/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Trigger ArgoCD sync
+        run: |
+          echo "Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "ArgoCD will auto-sync from the helm chart in this repo."
