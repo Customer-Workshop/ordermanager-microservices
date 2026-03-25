@@ -23,7 +23,7 @@ spec:
               service:
                 name: {{ include "inventory-service.fullname" $ }}
                 port:
-                  name: http
+                  number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
 {{- end }}
