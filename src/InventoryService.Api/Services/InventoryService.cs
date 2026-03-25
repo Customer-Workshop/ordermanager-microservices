@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryManagementService
+public class InventoryItemService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryManagementService(InventoryDbContext context)
+    public InventoryItemService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -40,12 +40,6 @@ public class InventoryManagementService
             .ToListAsync();
     }
 
-    public async Task<bool> CheckStockAsync(int productId, int quantity)
-    {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item is not null && item.QuantityOnHand >= quantity;
-    }
-
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
@@ -57,5 +51,11 @@ public class InventoryManagementService
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<bool> CheckStockAsync(int productId, int quantity)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return item != null && item.QuantityOnHand >= quantity;
     }
 }

@@ -2,17 +2,13 @@
 bin/
 obj/
 *.db
-*.user
-*.suo
-.vs/
 
 ## Node
 node_modules/
 dist/
-.angular/
 
 ## IDE
-.idea/
+.vs/
 .vscode/
 *.swp
 

@@ -27,7 +27,6 @@ interface InventoryItem {
           <th>On Hand</th>
           <th>Reorder Level</th>
           <th>Location</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
