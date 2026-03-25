@@ -10,7 +10,7 @@ A .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](h
 | **Frontend** | Angular 17 standalone components for inventory management |
 | **IaC** | Helm chart, Dockerfile, ArgoCD manifests, GitHub Actions CI/CD |
 
-## API Endpoints
+Standalone .NET 8 Web API + Angular 17 frontend for inventory management, decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -43,14 +43,20 @@ A .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](h
 # Restore and run the API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+
+# Run tests
+dotnet test --verbosity normal
 ```
 
-The API will be available at `http://localhost:5000`.
-
-### Run tests
+### Docker
 
 ```bash
-dotnet test
+docker build -f docker/Dockerfile -t inventory-service:local .
+docker run -p 8080:8080 inventory-service:local
+
+# Verify
+curl http://localhost:8080/health
+curl http://localhost:8080/swagger
 ```
 
 ## Platform Conformance
@@ -65,4 +71,4 @@ This service conforms to the [platform-engineering-shared-services](https://gith
 
 ## License
 
-MIT
+See [LICENSE](LICENSE).
