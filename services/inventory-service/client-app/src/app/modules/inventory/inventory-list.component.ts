@@ -23,11 +23,7 @@ import { environment } from '../../../environments/environment';
       </thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
-          <td>{{i.productName}}</td>
-          <td>{{i.quantityOnHand}}</td>
-          <td>{{i.reorderLevel}}</td>
-          <td>{{i.warehouseLocation}}</td>
-          <td>{{i.lastRestocked | date}}</td>
+          <td>{{i.productName}}</td><td>{{i.sku}}</td><td>{{i.quantityOnHand}}</td><td>{{i.reorderLevel}}</td><td>{{i.warehouseLocation}}</td><td>{{i.lastRestocked | date}}</td>
           <td>
             <input type="number" [(ngModel)]="restockQuantities[i.productId]" placeholder="Qty" min="1" style="width:60px">
             <button (click)="restock(i.productId)">Restock</button>
@@ -39,7 +35,7 @@ import { environment } from '../../../environments/environment';
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  restockQuantity = 10;
+  restockQuantities: { [key: number]: number } = {};
 
   constructor(private http: HttpClient) {}
 
@@ -48,13 +44,13 @@ export class InventoryListComponent implements OnInit {
   }
 
   loadInventory() {
-    this.http.get<any[]>(`${environment.apiUrl}/api/inventory`).subscribe(data => this.items = data);
+    this.http.get<any[]>('/api/inventory').subscribe(data => this.items = data);
   }
 
   restock(productId: number) {
     const qty = this.restockQuantities[productId];
     if (!qty || qty <= 0) return;
-    this.http.post(`${environment.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: qty })
+    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: qty })
       .subscribe(() => {
         this.restockQuantities[productId] = 0;
         this.loadInventory();

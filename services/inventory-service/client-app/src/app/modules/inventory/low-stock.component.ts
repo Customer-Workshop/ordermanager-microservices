@@ -15,15 +15,12 @@ import { environment } from '../../../environments/environment';
         <tr><th>Product</th><th>On Hand</th><th>Reorder Level</th><th>Location</th></tr>
       </thead>
       <tbody>
-        <tr *ngFor="let i of items" class="low-stock">
-          <td>{{i.productName}}</td>
-          <td>{{i.quantityOnHand}}</td>
-          <td>{{i.reorderLevel}}</td>
-          <td>{{i.warehouseLocation}}</td>
+        <tr *ngFor="let i of items">
+          <td>{{i.productName}}</td><td>{{i.sku}}</td><td>{{i.quantityOnHand}}</td><td>{{i.reorderLevel}}</td><td>{{i.warehouseLocation}}</td>
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">All items are sufficiently stocked.</p>
+    <p *ngIf="!items.length">All items are above reorder level.</p>
   `
 })
 export class LowStockComponent implements OnInit {
