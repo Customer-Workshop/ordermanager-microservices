@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
+          <td>{{i.lastRestocked | date}}</td>
         </tr>
       </tbody>
     </table>

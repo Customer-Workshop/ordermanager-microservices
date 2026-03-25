@@ -40,16 +40,20 @@ public class InventoryItemService
             .ToListAsync();
     }
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    public async Task<bool> DeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null) return null;
-
-        if (item.QuantityOnHand < quantity)
-            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
+        if (item is null || item.QuantityOnHand < quantity)
+            return false;
 
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
-        return item;
+        return true;
+    }
+
+    public async Task<int> GetStockLevelAsync(int productId)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return item?.QuantityOnHand ?? 0;
     }
 }

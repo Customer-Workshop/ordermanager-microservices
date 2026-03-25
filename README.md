@@ -2,9 +2,7 @@
 
 This repository contains microservices extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith).
 
-## Services
-
-### Inventory Service
+### Run tests
 
 A standalone .NET 8 Web API managing stock levels, warehouse locations, and reorder thresholds.
 
@@ -21,7 +19,14 @@ A standalone .NET 8 Web API managing stock levels, warehouse locations, and reor
 | GET | `/api/inventory/low-stock` | List low-stock items |
 | GET | `/health` | Health check |
 
-#### Running Locally
+## Getting Started
+
+### Prerequisites
+- .NET 8 SDK
+- Node.js 18+
+- Angular CLI (`npm install -g @angular/cli`)
+
+### Run the application
 
 ```bash
 cd services/inventory-service
