@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
@@ -27,29 +28,27 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-        return Ok(item);
+        try
+        {
+            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
     }
 
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
-    [HttpPost("product/{productId}/deduct")]
-    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
+    [HttpPost("check-and-reserve")]
+    public async Task<IActionResult> CheckAndReserve([FromBody] StockReservationRequest request)
     {
-        var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-        if (item is null)
-            return BadRequest(new { error = $"Insufficient stock or no inventory record for product {productId}" });
-        return Ok(item);
+        var response = await _inventoryService.CheckAndReserveStockAsync(request);
+        return response.Success ? Ok(response) : BadRequest(response);
     }
 
-    [HttpGet("product/{productId}/stock-level")]
-    public async Task<IActionResult> GetStockLevel(int productId)
-    {
-        var level = await _inventoryService.GetStockLevelAsync(productId);
-        return Ok(new { productId, quantityOnHand = level });
-    }
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
-
-public record RestockRequest(int Quantity);
-public record DeductRequest(int Quantity);

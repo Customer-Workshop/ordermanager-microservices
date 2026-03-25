@@ -19,6 +19,14 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ordermanager
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
     {{- if .Values.monitoring.enabled }}
     - from:
         - namespaceSelector:

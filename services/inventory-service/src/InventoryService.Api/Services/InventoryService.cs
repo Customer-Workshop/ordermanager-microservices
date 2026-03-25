@@ -40,19 +40,63 @@ public class InventoryItemService
             .ToListAsync();
     }
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    public async Task<StockReservationResponse> CheckAndReserveStockAsync(StockReservationRequest request)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null) return null;
-        if (item.QuantityOnHand < quantity) return null;
-        item.QuantityOnHand -= quantity;
-        await _context.SaveChangesAsync();
-        return item;
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var response = new StockReservationResponse { Success = true };
+
+            foreach (var reqItem in request.Items)
+            {
+                var inventory = await _context.InventoryItems
+                    .FirstOrDefaultAsync(i => i.ProductId == reqItem.ProductId);
+
+                if (inventory is null)
+                {
+                    response.Success = false;
+                    response.Error = $"No inventory record for product {reqItem.ProductId}";
+                    await transaction.RollbackAsync();
+                    return response;
+                }
+
+                if (inventory.QuantityOnHand < reqItem.Quantity)
+                {
+                    response.Success = false;
+                    response.Error = $"Insufficient stock for product {reqItem.ProductId} ({inventory.ProductName}). Available: {inventory.QuantityOnHand}, Requested: {reqItem.Quantity}";
+                    await transaction.RollbackAsync();
+                    return response;
+                }
+
+                inventory.QuantityOnHand -= reqItem.Quantity;
+
+                response.ReservedItems.Add(new ReservedItem
+                {
+                    ProductId = reqItem.ProductId,
+                    QuantityReserved = reqItem.Quantity,
+                    RemainingStock = inventory.QuantityOnHand
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return response;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return new StockReservationResponse
+            {
+                Success = false,
+                Error = $"Failed to reserve stock: {ex.Message}"
+            };
+        }
     }
 
-    public async Task<int> GetStockLevelAsync(int productId)
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        return item?.QuantityOnHand ?? 0;
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
     }
 }
