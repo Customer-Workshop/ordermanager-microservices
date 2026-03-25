@@ -4,6 +4,7 @@ obj/
 *.db
 *.user
 *.suo
+*.cache
 .vs/
 
 ## Node

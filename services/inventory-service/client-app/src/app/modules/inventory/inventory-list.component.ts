@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inventory-list',
@@ -10,7 +11,16 @@ import { FormsModule } from '@angular/forms';
   template: `
     <h2>Inventory</h2>
     <table *ngIf="items.length">
-      <thead><tr><th>Product</th><th>SKU</th><th>On Hand</th><th>Reorder Level</th><th>Location</th><th>Last Restocked</th><th>Actions</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>On Hand</th>
+          <th>Reorder Level</th>
+          <th>Location</th>
+          <th>Last Restocked</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
           <td>{{i.productName}}</td><td>{{i.sku}}</td><td>{{i.quantityOnHand}}</td><td>{{i.reorderLevel}}</td><td>{{i.warehouseLocation}}</td><td>{{i.lastRestocked | date}}</td>
@@ -21,7 +31,6 @@ import { FormsModule } from '@angular/forms';
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">No inventory items found.</p>
   `
 })
 export class InventoryListComponent implements OnInit {

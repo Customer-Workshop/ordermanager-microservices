@@ -24,7 +24,12 @@ The inventory-service owns all inventory concerns that were previously embedded 
 - **CI/CD**: GitHub Actions → ECR → ArgoCD sync
 - **Monitoring**: Prometheus ServiceMonitor
 
-#### Running Locally
+### Prerequisites
+- .NET 8 SDK
+- Node.js 18+
+- Angular CLI (`npm install -g @angular/cli`)
+
+### Run locally
 
 ```bash
 # Restore and run .NET API
@@ -69,6 +74,39 @@ This service conforms to the [platform-engineering-shared-services](https://gith
 - HPA for horizontal autoscaling in staging
 - ArgoCD automated sync with prune and self-heal
 
-## License
+## Deployment
 
-MIT
+See `docker/Dockerfile`, `helm/`, `argocd/`, and `.github/workflows/` for deployment configuration.
+
+```bash
+# Restore .NET dependencies
+dotnet restore services/inventory-service/InventoryService.sln
+
+# Install Angular dependencies
+cd services/inventory-service/client-app && npm install && cd -
+
+# Run the API (serves Angular app too)
+dotnet run --project services/inventory-service/src/InventoryService.Api/InventoryService.Api.csproj
+```
+
+The service will be available at `https://localhost:5001`.
+
+### Run Tests
+
+```bash
+dotnet test services/inventory-service/InventoryService.sln
+```
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/inventory` | List all inventory items |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
+| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith HTTP client) |
+| GET | `/api/inventory/low-stock` | List items at or below reorder level |
+
+## Monolith Integration
+
+The OrderManager monolith calls this service via HTTP instead of direct database access. Configure the monolith with the `InventoryService__BaseUrl` environment variable pointing to this service.
