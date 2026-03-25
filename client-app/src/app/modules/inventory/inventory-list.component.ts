@@ -4,12 +4,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
+interface InventoryItem {
+  id: number;
+  productId: number;
+  productName: string;
+  quantityOnHand: number;
+  reorderLevel: number;
+  warehouseLocation: string;
+  lastRestocked: string;
+}
+
 @Component({
   selector: 'app-inventory-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <h2>Inventory</h2>
+    <h2>Inventory Management</h2>
     <table *ngIf="items.length">
       <thead>
         <tr>

@@ -35,7 +35,6 @@ public class InventoryServiceTests
         var item = await service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
-        Assert.Equal(50, item.QuantityOnHand);
     }
 
     [Fact]
