@@ -46,12 +46,20 @@ public class InventoryItemService
         return item is not null && item.QuantityOnHand >= quantity;
     }
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity) return null;
+        if (item is null || item.QuantityOnHand < quantity)
+            return false;
+
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
-        return item;
+        return true;
+    }
+
+    public async Task<int> GetStockLevelAsync(int productId)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return item?.QuantityOnHand ?? 0;
     }
 }

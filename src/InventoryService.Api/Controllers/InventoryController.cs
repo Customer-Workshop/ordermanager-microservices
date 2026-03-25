@@ -35,7 +35,7 @@ public class InventoryController : ControllerBase
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 
     [HttpGet("product/{productId}/check")]
-    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity)
     {
         var available = await _inventoryService.CheckStockAsync(productId, quantity);
         return Ok(new { productId, quantity, available });
@@ -44,8 +44,17 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/deduct")]
     public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
-        var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-        return item is null ? BadRequest(new { error = $"Insufficient stock for product {productId}" }) : Ok(item);
+        var success = await _inventoryService.DeductStockAsync(productId, request.Quantity);
+        if (!success)
+            return BadRequest(new { message = $"Insufficient stock for product {productId}" });
+        return Ok(new { message = "Stock deducted successfully" });
+    }
+
+    [HttpGet("product/{productId}/stock-level")]
+    public async Task<IActionResult> GetStockLevel(int productId)
+    {
+        var level = await _inventoryService.GetStockLevelAsync(productId);
+        return Ok(new { productId, quantityOnHand = level });
     }
 }
 
