@@ -8,7 +8,7 @@ public class InventoryItem
     /// <summary>Unique identifier for the inventory record.</summary>
     public int Id { get; set; }
 
-    /// <summary>Foreign key referencing the product in the Product catalog service.</summary>
+    /// <summary>Foreign key referencing the product in the Product catalog.</summary>
     public int ProductId { get; set; }
 
     /// <summary>Human-readable product name (denormalized for display without cross-service calls).</summary>

@@ -19,14 +19,10 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}
-    # Allow traffic from the monolith namespace (cross-service calls)
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: decomposition-dev
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: decomposition-staging
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}

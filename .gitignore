@@ -1,28 +1,9 @@
-## .NET
 bin/
 obj/
 *.db
 *.user
 *.suo
 .vs/
-*.DotSettings.user
-
-## Node / Angular
 node_modules/
 dist/
 .angular/
-npm-debug.log*
-
-## IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-## OS
-.DS_Store
-Thumbs.db
-
-## Build
-publish/
-out/
