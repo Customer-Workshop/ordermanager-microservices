@@ -35,12 +35,11 @@ import { environment } from '../../../environments/environment';
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">No inventory items found.</p>
   `
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  restockQuantities: { [key: number]: number } = {};
+  restockQuantity = 10;
 
   constructor(private http: HttpClient) {}
 

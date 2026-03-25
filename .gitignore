@@ -2,15 +2,20 @@
 bin/
 obj/
 *.db
+*.user
+*.suo
+.vs/
 
 ## Node
 node_modules/
 dist/
+.angular/
 
 ## IDE
-.vs/
+.idea/
 .vscode/
 *.swp
+*.swo
 
 ## OS
 .DS_Store

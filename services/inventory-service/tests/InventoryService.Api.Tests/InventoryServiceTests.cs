@@ -19,7 +19,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetAllInventory_ReturnsSeedData()
+    public async Task GetAllInventory_ReturnsSeededItems()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -35,6 +35,15 @@ public class InventoryServiceTests
         var item = await service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
+    }
+
+    [Fact]
+    public async Task GetInventoryByProductId_ReturnsNull_WhenNotFound()
+    {
+        using var context = CreateContext();
+        var service = new InventoryItemService(context);
+        var item = await service.GetInventoryByProductIdAsync(999);
+        Assert.Null(item);
     }
 
     [Fact]
@@ -67,7 +76,6 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => service.DeductStockAsync(1, 99999));
     }
