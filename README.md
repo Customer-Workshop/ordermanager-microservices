@@ -1,30 +1,34 @@
-# Inventory Service
+# Inventory Microservice
 
-A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith).
+A .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts independently.
 
-## API Endpoints
+## Architecture
 
-This microservice owns the **Inventory** bounded context:
+| Component | Description |
+|-----------|-------------|
+| **API** | .NET 8 Web API with its own EF Core DbContext and SQLite database |
+| **Frontend** | Angular 17 standalone components for inventory management |
+| **IaC** | Helm chart, Dockerfile, ArgoCD manifests, GitHub Actions CI/CD |
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/inventory` | List all inventory items |
-| `GET /api/inventory/product/{id}` | Get inventory for a specific product |
-| `POST /api/inventory/product/{id}/restock` | Restock a product |
-| `GET /api/inventory/low-stock` | List items at or below reorder level |
-| `POST /api/inventory/product/{id}/deduct` | Deduct stock (called by monolith) |
-| `GET /health` | Health check endpoint |
+Standalone .NET 8 Web API + Angular 17 frontend for inventory management, decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
 
-### Prerequisites
-- .NET 8 SDK
-- Node.js 18+
-- Angular CLI
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/inventory` | List all inventory items |
+| GET | `/api/inventory/product/{id}` | Get inventory for a product |
+| POST | `/api/inventory/product/{id}/restock` | Restock a product |
+| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (called by monolith) |
+| GET | `/api/inventory/low-stock` | List items at or below reorder level |
+| GET | `/health` | Health check |
+
+## Tech Stack
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript
-- **Container**: Multi-stage Docker build
-- **Orchestration**: Helm chart, ArgoCD, HPA
-- **CI/CD**: GitHub Actions → ECR → ArgoCD
+- **Container**: Multi-stage Docker build (Node 20 + .NET 8)
+- **Orchestration**: Kubernetes via Helm + ArgoCD
+- **CI/CD**: GitHub Actions -> ECR -> ArgoCD auto-sync
+- **Monitoring**: Prometheus ServiceMonitor
 
 ## Getting Started
 
@@ -33,28 +37,38 @@ This microservice owns the **Inventory** bounded context:
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run the API
+### Run locally
 
 ```bash
+# Restore and run the API
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+
+# Run tests
+dotnet test --verbosity normal
 ```
 
-The API will be available at `http://localhost:5000`.
-
-### Run tests
+### Docker
 
 ```bash
-dotnet test
+docker build -f docker/Dockerfile -t inventory-service:local .
+docker run -p 8080:8080 inventory-service:local
+
+# Verify
+curl http://localhost:8080/health
+curl http://localhost:8080/swagger
 ```
 
-## Infrastructure
+## Platform Conformance
 
-- **Dockerfile**: `docker/Dockerfile` — multi-stage build (Node → .NET SDK → runtime)
-- **Helm chart**: `helm/inventory-service/` — deployment, service, network policy, service monitor, HPA
-- **ArgoCD**: `argocd/` — application manifests for dev and staging
-- **CI/CD**: `.github/workflows/build-push.yaml` — build, test, push to ECR
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
+
+- Deploys into `decomposition-dev` / `decomposition-staging` namespaces
+- Network policies restrict ingress to nginx-ingress and monitoring namespaces
+- ServiceMonitor exposes `/metrics` for Prometheus scraping
+- HPA scales based on CPU utilization in staging
+- ArgoCD auto-syncs from this repo's Helm chart
 
 ## License
 
-MIT
+See [LICENSE](LICENSE).
