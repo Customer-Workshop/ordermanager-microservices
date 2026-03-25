@@ -29,17 +29,10 @@ dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
 **Run tests:**
 ```bash
-cd services/inventory-service
-
-# Restore and run the API
-dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
-dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-
-# Run tests
 dotnet test
 ```
 
-## IaC
+## Deployment
 
 | Artifact | Path | Description |
 |----------|------|-------------|

@@ -1,8 +1,6 @@
-## .NET
 bin/
 obj/
 *.user
-*.userosscache
 *.suo
 *.cache
 *.dll
