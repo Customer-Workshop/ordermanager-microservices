@@ -8,34 +8,37 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <h2>Low Stock Items</h2>
+    <h2>Low Stock Alerts</h2>
+    <div class="alert" *ngIf="items.length">
+      <strong>{{items.length}} item(s)</strong> are at or below reorder level.
+    </div>
+    <p *ngIf="!items.length && loaded">All inventory levels are healthy.</p>
     <table *ngIf="items.length">
       <thead>
-        <tr>
-          <th>Product</th>
-          <th>On Hand</th>
-          <th>Reorder Level</th>
-          <th>Location</th>
-        </tr>
+        <tr><th>Product</th><th>Product ID</th><th>On Hand</th><th>Reorder Level</th><th>Location</th></tr>
       </thead>
       <tbody>
-        <tr *ngFor="let i of items">
+        <tr *ngFor="let i of items" class="low-stock">
           <td>{{i.productName}}</td>
+          <td>{{i.productId}}</td>
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">All items are well stocked.</p>
   `
 })
 export class LowStockComponent implements OnInit {
   items: any[] = [];
+  loaded = false;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>(environment.apiUrl + '/api/inventory/low-stock').subscribe(data => this.items = data);
+    this.http.get<any[]>(`${environment.apiUrl}/api/inventory/low-stock`).subscribe(data => {
+      this.items = data;
+      this.loaded = true;
+    });
   }
 }
