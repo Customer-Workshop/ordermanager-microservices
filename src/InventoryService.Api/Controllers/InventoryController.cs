@@ -46,7 +46,7 @@ public class InventoryController : ControllerBase
     {
         try
         {
-            var item = await _inventoryService.DecrementStockAsync(productId, request.Quantity);
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return item is null ? NotFound() : Ok(item);
         }
         catch (InvalidOperationException ex)
@@ -60,7 +60,7 @@ public class InventoryController : ControllerBase
     {
         try
         {
-            var item = await _inventoryService.DecrementStockAsync(productId, request.Quantity);
+            var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return item is null ? NotFound() : Ok(item);
         }
         catch (InvalidOperationException ex)
