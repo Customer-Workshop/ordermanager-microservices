@@ -4,18 +4,18 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryItemService
+public class InventoryManagementService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryItemService(InventoryDbContext context)
+    public InventoryManagementService(InventoryDbContext context)
     {
         _context = context;
     }
 
     public async Task<List<InventoryItem>> GetAllInventoryAsync()
     {
-        return await _context.InventoryItems.ToListAsync();
+        return await _context.InventoryItems.OrderBy(i => i.ProductId).ToListAsync();
     }
 
     public async Task<InventoryItem?> GetInventoryByProductIdAsync(int productId)
@@ -27,6 +27,7 @@ public class InventoryItemService
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
+
         item.QuantityOnHand += quantity;
         item.LastRestocked = DateTime.UtcNow;
         await _context.SaveChangesAsync();
@@ -37,6 +38,7 @@ public class InventoryItemService
     {
         return await _context.InventoryItems
             .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .OrderBy(i => i.QuantityOnHand)
             .ToListAsync();
     }
 
@@ -46,10 +48,14 @@ public class InventoryItemService
         return item is not null && item.QuantityOnHand >= quantity;
     }
 
-    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
+    public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity) return null;
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
+            ?? throw new ArgumentException($"No inventory record for product {productId}");
+
+        if (item.QuantityOnHand < quantity)
+            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {quantity}");
+
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;

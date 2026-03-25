@@ -3,10 +3,15 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Data;
 
+/// <summary>
+/// Entity Framework Core database context for the Inventory microservice.
+/// Manages inventory item persistence with SQLite.
+/// </summary>
 public class InventoryDbContext : DbContext
 {
     public InventoryDbContext(DbContextOptions<InventoryDbContext> options) : base(options) { }
 
+    /// <summary>Gets or sets the inventory items collection.</summary>
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -16,8 +21,7 @@ public class InventoryDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.ProductId).IsUnique();
             entity.Property(e => e.ProductName).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Sku).IsRequired().HasMaxLength(50);
-            entity.HasIndex(e => e.Sku).IsUnique();
+            entity.Property(e => e.WarehouseLocation).HasMaxLength(50);
         });
     }
 }
