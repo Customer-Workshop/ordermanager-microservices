@@ -19,16 +19,6 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.service.targetPort }}
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: decomposition-dev
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: decomposition-staging
-      ports:
-        - protocol: TCP
-          port: {{ .Values.service.targetPort }}
     {{- if .Values.monitoring.enabled }}
     - from:
         - namespaceSelector:
