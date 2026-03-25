@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using InventoryService.Api.Data;
-using InventoryService.Api.Models;
+using InventoryService.Data;
+using InventoryService.Models;
 
-namespace InventoryService.Api.Services;
+namespace InventoryService.Services;
 
-public class InventoryItemService
+public class InventoryManagementService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryItemService(InventoryDbContext context)
+    public InventoryManagementService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -33,13 +33,6 @@ public class InventoryItemService
         return item;
     }
 
-    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
-    {
-        return await _context.InventoryItems
-            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
-            .ToListAsync();
-    }
-
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
@@ -51,5 +44,17 @@ public class InventoryItemService
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    {
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
+    }
+
+    public async Task<InventoryItem?> GetStockLevelAsync(int productId)
+    {
+        return await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
     }
 }
