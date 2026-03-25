@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-microservices.git
     targetRevision: main
-    path: iac/helm/inventory-service
+    path: services/inventory-service/helm/inventory-service
     helm:
       valueFiles:
         - values.yaml
