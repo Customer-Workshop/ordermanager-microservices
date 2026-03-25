@@ -4,11 +4,11 @@ using InventoryService.Api.Models;
 
 namespace InventoryService.Api.Services;
 
-public class InventoryItemService
+public class InventoryManagementService
 {
     private readonly InventoryDbContext _context;
 
-    public InventoryItemService(InventoryDbContext context)
+    public InventoryManagementService(InventoryDbContext context)
     {
         _context = context;
     }
@@ -40,57 +40,16 @@ public class InventoryItemService
             .ToListAsync();
     }
 
-    public async Task<StockReservationResponse> CheckAndReserveStockAsync(StockReservationRequest request)
+    public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            var response = new StockReservationResponse { Success = true };
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        if (item is null) return null;
 
-            foreach (var reqItem in request.Items)
-            {
-                var inventory = await _context.InventoryItems
-                    .FirstOrDefaultAsync(i => i.ProductId == reqItem.ProductId);
+        if (item.QuantityOnHand < quantity)
+            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
 
-                if (inventory is null)
-                {
-                    response.Success = false;
-                    response.Error = $"No inventory record for product {reqItem.ProductId}";
-                    await transaction.RollbackAsync();
-                    return response;
-                }
-
-                if (inventory.QuantityOnHand < reqItem.Quantity)
-                {
-                    response.Success = false;
-                    response.Error = $"Insufficient stock for product {reqItem.ProductId} ({inventory.ProductName}). Available: {inventory.QuantityOnHand}, Requested: {reqItem.Quantity}";
-                    await transaction.RollbackAsync();
-                    return response;
-                }
-
-                inventory.QuantityOnHand -= reqItem.Quantity;
-
-                response.ReservedItems.Add(new ReservedItem
-                {
-                    ProductId = reqItem.ProductId,
-                    QuantityReserved = reqItem.Quantity,
-                    RemainingStock = inventory.QuantityOnHand
-                });
-            }
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return response;
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            return new StockReservationResponse
-            {
-                Success = false,
-                Error = $"Failed to reserve stock: {ex.Message}"
-            };
-        }
+        item.QuantityOnHand -= quantity;
+        await _context.SaveChangesAsync();
+        return item;
     }
-
 }
