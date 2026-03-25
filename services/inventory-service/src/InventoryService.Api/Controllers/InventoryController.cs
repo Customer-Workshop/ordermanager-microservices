@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
@@ -32,12 +33,16 @@ public class InventoryController : ControllerBase
     }
 
     [HttpPost("product/{productId}/deduct")]
-    public async Task<IActionResult> Deduct(int productId, [FromBody] DeductRequest request)
+    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductStockRequest request)
     {
         try
         {
             var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
@@ -48,6 +53,3 @@ public class InventoryController : ControllerBase
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
-
-public record RestockRequest(int Quantity);
-public record DeductRequest(int Quantity);

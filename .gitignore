@@ -4,6 +4,7 @@ obj/
 *.db
 *.user
 *.suo
+*.cache
 .vs/
 *.DotSettings.user
 
@@ -16,7 +17,6 @@ dist/
 .idea/
 .vscode/
 *.swp
-*.swo
 
 ## OS
 .DS_Store
