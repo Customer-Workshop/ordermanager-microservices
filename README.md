@@ -1,8 +1,8 @@
-# Inventory Microservice
+# Microservices — Decomposed from OrderManager Monolith
 
 A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts.
 
-## Architecture
+### Run tests
 
 | Component | Description |
 |-----------|-------------|
@@ -21,7 +21,7 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager 
 | GET | `/api/inventory/low-stock` | List items at or below reorder level |
 | GET | `/health` | Health check |
 
-## Tech Stack
+#### API Endpoints
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript
@@ -43,7 +43,6 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager 
 # Restore and run
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-```
 
 The API will be available at `https://localhost:5001`.
 
@@ -52,6 +51,8 @@ The API will be available at `https://localhost:5001`.
 ```bash
 dotnet test
 ```
+
+The API will be available at `http://localhost:5000`.
 
 ## Infrastructure
 
