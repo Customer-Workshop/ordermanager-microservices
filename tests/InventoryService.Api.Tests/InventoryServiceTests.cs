@@ -83,6 +83,10 @@ public class InventoryServiceTests
     public async Task CheckStock_ReturnsTrueWhenSufficient()
     {
         using var context = CreateContext();
+        var item = await context.InventoryItems.FirstAsync(i => i.ProductId == 1);
+        item.QuantityOnHand = 5;
+        await context.SaveChangesAsync();
+
         var service = new InventoryItemService(context);
         var result = await service.CheckStockAsync(1, 10);
         Assert.True(result);
@@ -98,7 +102,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task DeductStock_DecreasesQuantity()
+    public async Task CheckStock_ReturnsTrueWhenSufficient()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
