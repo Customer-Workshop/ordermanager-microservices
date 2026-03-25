@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  tag: dev-latest
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Development
+  - name: ConnectionStrings__DefaultConnection
+    value: "Data Source=inventory.db"
+
+persistence:
+  enabled: false
+
+autoscaling:
+  enabled: false

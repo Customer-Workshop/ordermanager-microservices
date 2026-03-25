@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  tag: staging-latest
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Staging
+  - name: ConnectionStrings__DefaultConnection
+    value: "Data Source=/data/inventory.db"
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: gp2
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
