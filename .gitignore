@@ -3,11 +3,13 @@ bin/
 obj/
 *.db
 *.user
+*.userosscache
 *.suo
 *.cache
-.vs/
+*.db-journal
 
-## Node
+## Angular
+client-app/node_modules/
 node_modules/
 dist/
 .angular/
@@ -19,8 +21,9 @@ dist/
 appsettings.Development.json
 
 ## IDE
-.idea/
+.vs/
 .vscode/
+.idea/
 *.swp
 
 ## OS

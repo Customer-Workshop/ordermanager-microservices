@@ -1,17 +1,17 @@
-# Microservices — Decomposed from OrderManager Monolith
+# Inventory Service Microservice
 
-A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder thresholds.
+A standalone .NET 8 + Angular 17 microservice extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder thresholds.
 
-## Services
+### Run tests
 
 | Component | Description |
 |-----------|-------------|
-| **API** | .NET 8 Web API with EF Core SQLite |
+| **API** | .NET 8 Web API with EF Core + SQLite |
 | **Frontend** | Angular 17 standalone components |
-| **Container** | Multi-stage Docker build (Node + .NET SDK + ASP.NET runtime) |
-| **Orchestration** | Helm chart with HPA, NetworkPolicy, ServiceMonitor |
-| **GitOps** | ArgoCD application manifests for dev and staging |
-| **CI/CD** | GitHub Actions: build, test, push to ECR |
+| **Docker** | Multi-stage build (Node → .NET SDK → Alpine runtime) |
+| **Helm** | Kubernetes deployment, service, network policy, HPA, ServiceMonitor |
+| **ArgoCD** | GitOps application manifests for dev and staging |
+| **CI/CD** | GitHub Actions: build, test, push to ECR, trigger ArgoCD |
 
 ## API Endpoints
 
@@ -20,34 +20,31 @@ A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager m
 | GET | `/api/inventory` | List all inventory items |
 | GET | `/api/inventory/product/{productId}` | Get inventory for a product |
 | POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/api/inventory/product/{productId}/check?quantity=N` | Check stock availability |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
-| GET | `/health` | Health check |
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{id}` | Get inventory for a product |
-| POST | `/api/inventory/product/{id}/restock` | Restock a product |
 | GET | `/api/inventory/low-stock` | List low-stock items |
-| GET | `/api/inventory/product/{id}/check?quantity=N` | Check stock availability |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (used by monolith HTTP client) |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith) |
+| GET | `/api/inventory/product/{productId}/stock-level` | Get current stock level |
 | GET | `/health` | Health check endpoint |
+
+## Getting Started
 
 ### Prerequisites
 - .NET 8 SDK
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run locally
+### Run the application
 
 ```bash
-# Restore and run the API
+# Restore .NET dependencies
 dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+
+# Install Angular dependencies
+cd client-app && npm install && cd ..
+
+# Run the API (serves Angular app too)
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 
-The API will be available at `http://localhost:5000`.
+The service will be available at `https://localhost:5001`.
 
 ### Run tests
 
@@ -55,39 +52,15 @@ The API will be available at `http://localhost:5000`.
 dotnet test
 ```
 
-## Deployment
+## Platform Conformance
 
-See `docker/Dockerfile`, `helm/`, `argocd/`, and `.github/workflows/` for deployment configuration.
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
 
-```bash
-# Restore .NET dependencies
-dotnet restore services/inventory-service/InventoryService.sln
+- **Namespaces**: `decomposition-dev`, `decomposition-staging`
+- **Network Policies**: Ingress from `ingress-nginx` and `monitoring` namespaces only
+- **Monitoring**: Prometheus ServiceMonitor scraping `/metrics`
+- **Autoscaling**: HPA with CPU-based scaling in staging
 
-# Install Angular dependencies
-cd services/inventory-service/client-app && npm install && cd -
+## License
 
-# Run the API (serves Angular app too)
-dotnet run --project services/inventory-service/src/InventoryService.Api/InventoryService.Api.csproj
-```
-
-The service will be available at `https://localhost:5001`.
-
-### Run Tests
-
-```bash
-dotnet test services/inventory-service/InventoryService.sln
-```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
-| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
-| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by monolith HTTP client) |
-| GET | `/api/inventory/low-stock` | List items at or below reorder level |
-
-## Monolith Integration
-
-The OrderManager monolith calls this service via HTTP instead of direct database access. Configure the monolith with the `InventoryService__BaseUrl` environment variable pointing to this service.
+MIT
