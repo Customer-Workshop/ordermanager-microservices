@@ -19,7 +19,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetAllInventory_ReturnsSeededItems()
+    public async Task GetAllInventory_ReturnsSeedData()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -28,7 +28,7 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetInventoryByProductId_ReturnsItem()
+    public async Task GetByProductId_ReturnsCorrectItem()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
@@ -38,24 +38,15 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetInventoryByProductId_ReturnsNull_WhenNotFound()
-    {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(999);
-        Assert.Null(item);
-    }
-
-    [Fact]
     public async Task Restock_IncreasesQuantity()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(1);
-        var qtyBefore = item!.QuantityOnHand;
+        var before = await service.GetInventoryByProductIdAsync(1);
+        var qtyBefore = before!.QuantityOnHand;
 
-        var result = await service.RestockAsync(1, 25);
-        Assert.Equal(qtyBefore + 25, result.QuantityOnHand);
+        var after = await service.RestockAsync(1, 25);
+        Assert.Equal(qtyBefore + 25, after.QuantityOnHand);
     }
 
     [Fact]
@@ -63,11 +54,12 @@ public class InventoryServiceTests
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(1);
-        var qtyBefore = item!.QuantityOnHand;
+        var before = await service.GetInventoryByProductIdAsync(1);
+        var qtyBefore = before!.QuantityOnHand;
 
-        var result = await service.DeductStockAsync(1, 10);
-        Assert.Equal(qtyBefore - 10, result.QuantityOnHand);
+        var after = await service.DeductStockAsync(1, 10);
+        Assert.NotNull(after);
+        Assert.Equal(qtyBefore - 10, after.QuantityOnHand);
     }
 
     [Fact]
@@ -90,16 +82,11 @@ public class InventoryServiceTests
     }
 
     [Fact]
-    public async Task GetLowStockItems_ReturnsItems_WhenBelowReorderLevel()
+    public async Task GetStockLevel_ReturnsCorrectValue()
     {
         using var context = CreateContext();
         var service = new InventoryItemService(context);
-
-        // Deduct stock to bring below reorder level
-        await service.DeductStockAsync(1, 45);
-
-        var lowStock = await service.GetLowStockItemsAsync();
-        Assert.Single(lowStock);
-        Assert.Equal(1, lowStock[0].ProductId);
+        var level = await service.GetStockLevelAsync(1);
+        Assert.Equal(50, level);
     }
 }

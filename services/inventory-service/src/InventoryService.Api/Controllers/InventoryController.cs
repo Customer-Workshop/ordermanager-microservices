@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using InventoryService.Api.Models;
 using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Controllers;
@@ -28,28 +27,20 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        try
-        {
-            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+        return Ok(item);
     }
 
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
+
     [HttpPost("product/{productId}/deduct")]
-    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductStockRequest request)
+    public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
         try
         {
             var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
+            return item is null ? NotFound() : Ok(item);
         }
         catch (InvalidOperationException ex)
         {
@@ -57,6 +48,13 @@ public class InventoryController : ControllerBase
         }
     }
 
-    [HttpGet("low-stock")]
-    public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
+    [HttpGet("product/{productId}/stock-level")]
+    public async Task<IActionResult> GetStockLevel(int productId)
+    {
+        var level = await _inventoryService.GetStockLevelAsync(productId);
+        return Ok(new { productId, quantityOnHand = level });
+    }
 }
+
+public record RestockRequest(int Quantity);
+public record DeductRequest(int Quantity);
