@@ -58,4 +58,11 @@ public class InventoryItemService
         await _context.SaveChangesAsync();
         return item;
     }
+
+    public async Task<List<InventoryItem>> GetLowStockItemsAsync()
+    {
+        return await _context.InventoryItems
+            .Where(i => i.QuantityOnHand <= i.ReorderLevel)
+            .ToListAsync();
+    }
 }

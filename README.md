@@ -18,7 +18,9 @@ A .NET 8 + Angular 17 microservice extracted from the OrderManager monolith. Man
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript
-- **API**: RESTful with Swagger/OpenAPI
+- **Container**: Multi-stage Docker build (Alpine)
+- **Orchestration**: Helm, ArgoCD, HPA
+- **CI/CD**: GitHub Actions, Amazon ECR
 
 ## Getting Started
 
@@ -36,7 +38,7 @@ dotnet restore
 # Install Angular dependencies
 cd client-app && npm install && cd ..
 
-# Run the API (serves Angular app too)
+# Run the API
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 ```
 
@@ -48,7 +50,7 @@ The application will be available at `http://localhost:5000`.
 dotnet test
 ```
 
-## Infrastructure
+## Deployment
 
 - **Docker**: Multi-stage build in `docker/Dockerfile`
 - **Helm**: Kubernetes deployment chart in `helm/inventory-service/`
