@@ -1,16 +1,22 @@
+## .NET
 bin/
 obj/
 *.user
 *.suo
+*.db
+*.db-journal
 
 ## Node
 node_modules/
 dist/
+.angular/
 
 ## IDE
-.idea/
+.vs/
 .vscode/
+.idea/
 *.swp
+*.swo
 
 ## OS
 .DS_Store

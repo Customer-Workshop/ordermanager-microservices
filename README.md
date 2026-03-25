@@ -1,50 +1,38 @@
-# Inventory Microservice
+# Inventory Service
 
-A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts.
+A standalone .NET 8 + Angular 17 microservice decomposed from the OrderManager monolith. Manages stock levels, warehouse locations, and reorder thresholds.
 
-## Architecture
-
-| Component | Description |
-|-----------|-------------|
-| **Backend** | .NET 8 Web API with EF Core + SQLite |
-| **Frontend** | Angular 17 standalone components |
-| **API** | RESTful with Swagger/OpenAPI + health endpoint |
-
-### API Endpoints
+## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/inventory` | List all inventory items |
-| GET | `/api/inventory/product/{id}` | Get inventory for a product |
-| POST | `/api/inventory/product/{id}/restock` | Restock a product |
-| POST | `/api/inventory/product/{id}/deduct` | Deduct stock (called by OrderManager) |
+| GET | `/api/inventory/product/{productId}` | Get inventory for a specific product |
+| POST | `/api/inventory/product/{productId}/restock` | Restock a product |
 | GET | `/api/inventory/low-stock` | List items at or below reorder level |
-| GET | `/health` | Health check |
+| GET | `/api/inventory/product/{productId}/check?quantity=N` | Check if stock is available |
+| POST | `/api/inventory/product/{productId}/deduct` | Deduct stock (used by order service) |
 
-#### API Endpoints
+## Tech Stack
 
 - **Backend**: .NET 8, C#, Entity Framework Core, SQLite
 - **Frontend**: Angular 17, TypeScript
-- **Container**: Multi-stage Docker build (Node + .NET SDK + ASP.NET runtime)
-- **Orchestration**: Kubernetes (Helm chart), ArgoCD, HPA
-- **CI/CD**: GitHub Actions -> ECR -> ArgoCD sync
-- **Monitoring**: Prometheus ServiceMonitor
+- **API**: RESTful with Swagger/OpenAPI
 
 ## Getting Started
 
 ### Prerequisites
 - .NET 8 SDK
 - Node.js 18+
-- Angular CLI (`npm install -g @angular/cli`)
+- Angular CLI
 
-### Run Locally
+### Run the application
 
 ```bash
-# Restore and run
-dotnet restore src/InventoryService.Api/InventoryService.Api.csproj
+dotnet restore
+cd client-app && npm install && cd ..
 dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
-
-The API will be available at `https://localhost:5001`.
+```
 
 ### Run Tests
 
@@ -52,23 +40,6 @@ The API will be available at `https://localhost:5001`.
 dotnet test
 ```
 
-The application will be available at `http://localhost:5000`.
+## Monolith Integration
 
-### Run tests
-
-- **Dockerfile**: `docker/Dockerfile`
-- **Helm chart**: `helm/inventory-service/`
-- **ArgoCD manifests**: `argocd/`
-- **CI/CD pipeline**: `.github/workflows/build-push.yaml`
-
-## Platform Conformance
-
-This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
-- Deploys to `decomposition-dev` / `decomposition-staging` namespaces
-- Network policies: default-deny with explicit allow from ingress-nginx, ordermanager, and monitoring
-- Prometheus ServiceMonitor for observability
-- ArgoCD automated sync with prune and self-heal
-
-## License
-
-MIT
+The OrderManager monolith calls this service via HTTP instead of direct database access. Configure the monolith with the `InventoryServiceUrl` setting pointing to this service.

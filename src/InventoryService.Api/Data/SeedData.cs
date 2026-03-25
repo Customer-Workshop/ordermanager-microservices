@@ -18,6 +18,7 @@ public static class SeedData
             new InventoryItem { ProductId = 4, ProductName = "Gadget Y", QuantityOnHand = 200, ReorderLevel = 10, WarehouseLocation = "A-04" },
             new InventoryItem { ProductId = 5, ProductName = "Thingamajig", QuantityOnHand = 250, ReorderLevel = 10, WarehouseLocation = "A-05" },
         };
+
         context.InventoryItems.AddRange(items);
         context.SaveChanges();
     }

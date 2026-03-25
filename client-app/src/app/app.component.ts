@@ -6,14 +6,20 @@ import { RouterOutlet, RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, RouterLink],
   template: `
-    <nav>
-      <h1>Inventory Service</h1>
-      <a routerLink="/inventory">Inventory</a>
-      <a routerLink="/low-stock">Low Stock Alerts</a>
+    <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
+      <div class="container">
+        <a class="navbar-brand" routerLink="/">Inventory Service</a>
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" routerLink="/inventory">Inventory</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/low-stock">Low Stock</a></li>
+        </ul>
+      </div>
     </nav>
-    <router-outlet></router-outlet>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
   `
 })
 export class AppComponent {
-  title = 'InventoryService';
+  title = 'Inventory Service';
 }
