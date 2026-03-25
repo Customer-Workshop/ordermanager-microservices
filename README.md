@@ -1,29 +1,30 @@
-# Microservices — OrderManager Decomposition
+# Inventory Service Microservice
 
-Standalone microservices extracted from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Each service is independently deployable and conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard.
+A standalone .NET 8 + Angular 17 microservice decomposed from the [OrderManager monolith](https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-monolith). Manages stock levels, warehouse locations, and reorder alerts independently.
 
-## Services
+## Architecture
 
-| Service | Description | Tech Stack |
-|---------|-------------|------------|
-| **inventory-service** | Stock levels, warehouse locations, reorder alerts, stock deduction | .NET 8 Web API, EF Core, SQLite, Angular 17 |
+This microservice owns the **Inventory** bounded context:
 
-## Repository Structure
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/inventory` | GET | List all inventory items |
+| `/api/inventory/product/{id}` | GET | Get inventory for a specific product |
+| `/api/inventory/product/{id}/restock` | POST | Restock a product |
+| `/api/inventory/product/{id}/check` | GET | Check stock availability |
+| `/api/inventory/product/{id}/deduct` | POST | Deduct stock (called by Order service) |
+| `/api/inventory/low-stock` | GET | List items at or below reorder level |
+| `/health` | GET | Health check endpoint |
 
-```
-services/
-└── inventory-service/
-    ├── src/InventoryService.Api/    # .NET 8 Web API
-    ├── tests/                       # xUnit tests
-    ├── client-app/                  # Angular 17 frontend
-    ├── docker/Dockerfile            # Multi-stage Docker build
-    ├── helm/inventory-service/      # Helm chart (deployment, service, networkpolicy, HPA, servicemonitor)
-    ├── argocd/                      # ArgoCD application manifests (dev, staging)
-    └── InventoryService.sln
-.github/
-└── workflows/
-    └── inventory-service-ci.yaml    # CI/CD: build, test, push to ECR, trigger ArgoCD
-```
+## Tech Stack
+
+- **Backend**: .NET 8, C#, Entity Framework Core, SQLite
+- **Frontend**: Angular 17, TypeScript
+- **API**: RESTful with Swagger/OpenAPI
+- **Container**: Multi-stage Docker build (Alpine-based)
+- **Orchestration**: Kubernetes (Helm chart included)
+- **GitOps**: ArgoCD application manifests for dev and staging
+- **CI/CD**: GitHub Actions — build, test, push to ECR
 
 ## Getting Started
 
@@ -32,7 +33,22 @@ services/
 - Node.js 18+
 - Angular CLI (`npm install -g @angular/cli`)
 
-### Run the Inventory Service
+### Run the application
+
+```bash
+# Restore .NET dependencies
+dotnet restore
+
+# Install Angular dependencies
+cd client-app && npm install && cd ..
+
+# Run the API (serves Angular app too)
+dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
+```
+
+The application will be available at `http://localhost:5000`.
+
+### Run tests
 
 ```bash
 cd services/inventory-service
@@ -45,17 +61,22 @@ dotnet run --project src/InventoryService.Api/InventoryService.Api.csproj
 dotnet test
 ```
 
-The API will be available at `http://localhost:5000` with Swagger at `/swagger`.
+## IaC
+
+| Component | Path |
+|-----------|------|
+| Dockerfile | `docker/Dockerfile` |
+| Helm chart | `helm/inventory-service/` |
+| ArgoCD manifests | `argocd/` |
+| CI/CD pipeline | `.github/workflows/build-push.yaml` |
 
 ## Platform Conformance
 
-Each service includes:
-- **Helm chart** with deployment, service, network policy, HPA, and ServiceMonitor
-- **ArgoCD** application manifests for dev and staging environments
-- **Dockerfile** following the multi-stage build pattern from `app_dotnet-angular-monolith-iac`
-- **GitHub Actions** CI/CD pipeline for build, test, ECR push, and ArgoCD sync
-- **Network policies** allowing ingress from NGINX ingress controller and monitoring namespace
-- **Health checks** at `/health` for Kubernetes liveness/readiness probes
+This service conforms to the [platform-engineering-shared-services](https://github.com/Cognition-Partner-Workshops/platform-engineering-shared-services) standard:
+- Deploys into `decomposition-dev` / `decomposition-staging` namespaces
+- Network policies restrict ingress to ingress-nginx and monitoring namespaces
+- ServiceMonitor exposes `/metrics` for Prometheus scraping
+- HPA enabled in staging (2–4 replicas, 75% CPU target)
 
 ## License
 

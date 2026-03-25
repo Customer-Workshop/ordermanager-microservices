@@ -3,8 +3,20 @@ bin/
 obj/
 *.db
 *.user
+*.userosscache
 *.suo
+*.cache
+*.db
+*.db-journal
+
+## Angular
+client-app/node_modules/
+client-app/dist/
+client-app/.angular/
+
+## IDE
 .vs/
+*.DotSettings.user
 
 ## Node
 node_modules/
@@ -15,3 +27,10 @@ dist/
 .idea/
 .vscode/
 *.swp
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Build output
+wwwroot/

@@ -10,16 +10,7 @@ import { FormsModule } from '@angular/forms';
   template: `
     <h2>Inventory</h2>
     <table *ngIf="items.length">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>On Hand</th>
-          <th>Reorder Level</th>
-          <th>Location</th>
-          <th>Last Restocked</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Product</th><th>On Hand</th><th>Reorder Level</th><th>Location</th><th>Last Restocked</th><th>Actions</th></tr></thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
           <td>{{i.productName}}</td>
@@ -28,7 +19,7 @@ import { FormsModule } from '@angular/forms';
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty" style="width:60px">
+            <input type="number" [(ngModel)]="restockQty" min="1" placeholder="Qty" style="width:60px">
             <button (click)="restock(i.productId)">Restock</button>
           </td>
         </tr>
@@ -39,21 +30,21 @@ import { FormsModule } from '@angular/forms';
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  restockQuantities: { [key: number]: number } = {};
+  restockQty = 10;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.loadInventory();
+    this.loadItems();
   }
 
-  loadInventory() {
-    this.http.get<any[]>('/api/inventory').subscribe(data => this.items = data);
+  loadItems() {
+    this.http.get<any[]>(`${this.apiUrl}/api/inventory`).subscribe(data => this.items = data);
   }
 
   restock(productId: number) {
-    const qty = this.restockQuantities[productId] || 1;
-    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: qty })
-      .subscribe(() => this.loadInventory());
+    this.http.post(`${this.apiUrl}/api/inventory/product/${productId}/restock`, { quantity: this.restockQty })
+      .subscribe(() => this.loadItems());
   }
 }
