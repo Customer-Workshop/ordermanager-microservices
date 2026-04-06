@@ -1,1 +1,1 @@
-# app_dotnet-angular-microservices
+# Inventory Service Microservice
