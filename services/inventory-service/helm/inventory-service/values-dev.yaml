@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  tag: dev-latest
+
+ingress:
+  hosts:
+    - host: inventory-dev.workshop.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  ASPNETCORE_ENVIRONMENT: Development
+  ConnectionStrings__DefaultConnection: "inventory.db"
+
+persistence:
+  enabled: false
