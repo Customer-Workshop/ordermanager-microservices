@@ -19,8 +19,8 @@ import { FormsModule } from '@angular/forms';
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQty" min="1" placeholder="Qty" style="width:60px">
-            <button (click)="restock(i.productId)">Restock</button>
+            <input type="number" [(ngModel)]="i.restockQty" min="1" placeholder="Qty" style="width:60px">
+            <button (click)="restock(i.productId, i.restockQty || 10)">Restock</button>
           </td>
         </tr>
       </tbody>
@@ -30,12 +30,15 @@ import { FormsModule } from '@angular/forms';
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
-  restockQty = 10;
   constructor(private http: HttpClient) {}
   ngOnInit() { this.loadItems(); }
-  loadItems() { this.http.get<any[]>('/api/inventory').subscribe(data => this.items = data); }
-  restock(productId: number) {
-    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: this.restockQty })
+  loadItems() {
+    this.http.get<any[]>('/api/inventory').subscribe(data => {
+      this.items = data.map(item => ({ ...item, restockQty: 10 }));
+    });
+  }
+  restock(productId: number, quantity: number) {
+    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity })
       .subscribe(() => this.loadItems());
   }
 }
