@@ -27,8 +27,15 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-        return Ok(item);
+        try
+        {
+            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
     }
 
     [HttpPost("product/{productId}/deduct")]

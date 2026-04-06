@@ -25,6 +25,9 @@ public class InventoryItemService
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null)
             throw new InvalidOperationException($"Inventory item for product {productId} not found.");
@@ -37,6 +40,9 @@ public class InventoryItemService
 
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null)
             throw new InvalidOperationException($"Inventory item for product {productId} not found.");
