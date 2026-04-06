@@ -40,4 +40,4 @@ monitoring:
 
 networkPolicy:
   enabled: true
-  monolithNamespace: decomposition-dev
+  monolithNamespace: decomposition-prod

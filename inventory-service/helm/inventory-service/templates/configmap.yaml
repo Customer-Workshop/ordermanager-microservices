@@ -5,6 +5,6 @@ metadata:
   labels:
     {{- include "inventory-service.labels" . | nindent 4 }}
 data:
-  ASPNETCORE_ENVIRONMENT: {{ .Values.env | default (list) | toJson | quote }}
+  ASPNETCORE_ENVIRONMENT: {{ (index (default (list (dict "name" "ASPNETCORE_ENVIRONMENT" "value" "Production")) .Values.env | first).value | default "Production" | quote }}
   Logging__LogLevel__Default: "Information"
   Logging__LogLevel__Microsoft.AspNetCore: "Warning"
