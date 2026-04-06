@@ -46,6 +46,12 @@ public class InventoryItemService
         return item;
     }
 
+    public async Task<bool> CheckStockAsync(int productId, int quantity)
+    {
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return item is not null && item.QuantityOnHand >= quantity;
+    }
+
     public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
         return await _context.InventoryItems
