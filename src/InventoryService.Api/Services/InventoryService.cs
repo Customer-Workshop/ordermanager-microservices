@@ -25,6 +25,7 @@ public class InventoryItemService
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0) throw new ArgumentException("Quantity must be positive", nameof(quantity));
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;
@@ -48,6 +49,7 @@ public class InventoryItemService
 
     public async Task<InventoryItem?> DeductStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0) throw new ArgumentException("Quantity must be positive", nameof(quantity));
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item is null || item.QuantityOnHand < quantity) return null;
         item.QuantityOnHand -= quantity;
