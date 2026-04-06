@@ -16,8 +16,25 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json"
           }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "port": 4200,
+            "host": "0.0.0.0",
+            "proxyConfig": "proxy.conf.json"
+          },
+          "configurations": {
+            "development": {
+              "buildTarget": "client-app:build"
+            }
+          },
+          "defaultConfiguration": "development"
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

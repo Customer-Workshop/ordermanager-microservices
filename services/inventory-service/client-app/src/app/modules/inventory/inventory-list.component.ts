@@ -40,7 +40,41 @@ import { environment } from '../../../environments/environment';
       </tbody>
     </table>
     <p *ngIf="!items.length">No inventory items found.</p>
-  `
+  `,
+  styles: [`
+    h2 { color: #1a237e; margin-bottom: 16px; }
+    .actions { margin-bottom: 16px; display: flex; gap: 8px; }
+    .actions button {
+      background: #1a237e; color: white; border: none;
+      padding: 8px 20px; border-radius: 4px; cursor: pointer;
+      font-size: 0.9rem; transition: background 0.2s;
+    }
+    .actions button:hover { background: #283593; }
+    table {
+      width: 100%; border-collapse: collapse;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    th {
+      background: #e8eaf6; color: #1a237e; text-align: left;
+      padding: 12px; font-size: 0.85rem; text-transform: uppercase;
+      letter-spacing: 0.5px; border-bottom: 2px solid #c5cae9;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
+    tr:hover { background: #f5f5f5; }
+    tr.low-stock { background: #ffebee; }
+    tr.low-stock:hover { background: #ffcdd2; }
+    td input {
+      width: 60px; padding: 4px 8px; border: 1px solid #bdbdbd;
+      border-radius: 4px; margin-right: 6px;
+    }
+    td button {
+      background: #43a047; color: white; border: none;
+      padding: 5px 14px; border-radius: 4px; cursor: pointer;
+      font-size: 0.85rem;
+    }
+    td button:hover { background: #388e3c; }
+    p { color: #757575; font-style: italic; }
+  `]
 })
 export class InventoryListComponent implements OnInit {
   items: any[] = [];
