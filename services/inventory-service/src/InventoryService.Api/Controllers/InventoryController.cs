@@ -28,8 +28,17 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-        return Ok(item);
+        try
+        {
+            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentException ex)
+        {
+            return ex.ParamName == "quantity"
+                ? BadRequest(new { message = ex.Message })
+                : NotFound(new { message = ex.Message });
+        }
     }
 
     [HttpGet("low-stock")]

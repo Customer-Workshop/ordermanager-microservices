@@ -25,6 +25,8 @@ public class InventoryItemService
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be positive", nameof(quantity));
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;
@@ -42,12 +44,29 @@ public class InventoryItemService
 
     public async Task<bool> DeductStockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
-        if (item is null || item.QuantityOnHand < quantity)
+        if (quantity <= 0)
             return false;
-        item.QuantityOnHand -= quantity;
-        await _context.SaveChangesAsync();
-        return true;
+
+        const int maxRetries = 3;
+        for (int attempt = 0; attempt < maxRetries; attempt++)
+        {
+            var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+            if (item is null || item.QuantityOnHand < quantity)
+                return false;
+            item.QuantityOnHand -= quantity;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Another request modified this row; reload and retry
+                foreach (var entry in _context.ChangeTracker.Entries())
+                    await entry.ReloadAsync();
+            }
+        }
+        return false;
     }
 
     public async Task<int> GetStockLevelAsync(int productId)

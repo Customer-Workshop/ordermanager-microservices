@@ -9,4 +9,5 @@ public class InventoryItem
     public int ReorderLevel { get; set; } = 10;
     public string WarehouseLocation { get; set; } = string.Empty;
     public DateTime LastRestocked { get; set; } = DateTime.UtcNow;
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }
