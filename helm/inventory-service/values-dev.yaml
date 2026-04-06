@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  tag: "dev-latest"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+persistence:
+  enabled: false
+
+ingress:
+  enabled: true
+  hosts:
+    - host: inventory-dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
