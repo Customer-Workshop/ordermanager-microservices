@@ -20,6 +20,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -36,6 +38,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UseStaticFiles();
 app.MapControllers();
-
+app.MapHealthChecks("/health");
+app.MapFallbackToFile("index.html");
 app.Run();
