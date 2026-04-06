@@ -47,6 +47,9 @@ monitoring:
 networkPolicy:
   enabled: true
 
+podDisruptionBudget:
+  minAvailable: 1
+
 persistence:
   enabled: true
   size: 1Gi
