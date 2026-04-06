@@ -6,37 +6,41 @@ using InventoryService.Api.Services;
 
 namespace InventoryService.Api.Tests;
 
-public class InventoryServiceTests
+public class InventoryServiceTests : IDisposable
 {
-    private static InventoryDbContext CreateContext()
+    private readonly InventoryDbContext _context;
+    private readonly InventoryItemService _service;
+
+    public InventoryServiceTests()
     {
         var options = new DbContextOptionsBuilder<InventoryDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        var context = new InventoryDbContext(options);
-        context.InventoryItems.AddRange(
+        _context = new InventoryDbContext(options);
+        _context.InventoryItems.AddRange(
             new InventoryItem { Id = 1, ProductId = 1, ProductName = "Widget A", QuantityOnHand = 50, ReorderLevel = 10, WarehouseLocation = "A-01" },
             new InventoryItem { Id = 2, ProductId = 2, ProductName = "Widget B", QuantityOnHand = 5, ReorderLevel = 10, WarehouseLocation = "A-02" }
         );
-        context.SaveChanges();
-        return context;
+        _context.SaveChanges();
+        _service = new InventoryItemService(_context);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
     }
 
     [Fact]
     public async Task GetAllInventory_ReturnsAllItems()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var items = await service.GetAllInventoryAsync();
+        var items = await _service.GetAllInventoryAsync();
         Assert.Equal(2, items.Count);
     }
 
     [Fact]
     public async Task GetByProductId_ReturnsCorrectItem()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(1);
+        var item = await _service.GetInventoryByProductIdAsync(1);
         Assert.NotNull(item);
         Assert.Equal("Widget A", item.ProductName);
     }
@@ -44,27 +48,21 @@ public class InventoryServiceTests
     [Fact]
     public async Task GetByProductId_ReturnsNull_WhenNotFound()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.GetInventoryByProductIdAsync(999);
+        var item = await _service.GetInventoryByProductIdAsync(999);
         Assert.Null(item);
     }
 
     [Fact]
     public async Task Restock_IncreasesQuantity()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.RestockAsync(1, 25);
+        var item = await _service.RestockAsync(1, 25);
         Assert.Equal(75, item.QuantityOnHand);
     }
 
     [Fact]
     public async Task GetLowStockItems_ReturnsOnlyLowStock()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var items = await service.GetLowStockItemsAsync();
+        var items = await _service.GetLowStockItemsAsync();
         Assert.Single(items);
         Assert.Equal(2, items[0].ProductId);
     }
@@ -72,27 +70,21 @@ public class InventoryServiceTests
     [Fact]
     public async Task CheckStock_ReturnsTrueWhenSufficient()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var result = await service.CheckStockAsync(1, 10);
+        var result = await _service.CheckStockAsync(1, 10);
         Assert.True(result);
     }
 
     [Fact]
     public async Task CheckStock_ReturnsFalseWhenInsufficient()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var result = await service.CheckStockAsync(2, 100);
+        var result = await _service.CheckStockAsync(2, 100);
         Assert.False(result);
     }
 
     [Fact]
     public async Task DeductStock_DeductsQuantity()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.DeductStockAsync(1, 10);
+        var item = await _service.DeductStockAsync(1, 10);
         Assert.NotNull(item);
         Assert.Equal(40, item.QuantityOnHand);
     }
@@ -100,9 +92,7 @@ public class InventoryServiceTests
     [Fact]
     public async Task DeductStock_ReturnsNull_WhenInsufficient()
     {
-        using var context = CreateContext();
-        var service = new InventoryItemService(context);
-        var item = await service.DeductStockAsync(2, 100);
+        var item = await _service.DeductStockAsync(2, 100);
         Assert.Null(item);
     }
 }

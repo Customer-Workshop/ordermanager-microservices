@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../environments/environment';
+import { InventoryItem } from './inventory.model';
+import { InventoryService } from './inventory.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -20,7 +20,9 @@ import { environment } from '../../../environments/environment';
   `
 })
 export class InventoryListComponent implements OnInit {
-  items: any[] = [];
-  constructor(private http: HttpClient) {}
-  ngOnInit() { this.http.get<any[]>(`${environment.apiUrl}/api/inventory`).subscribe(data => this.items = data); }
+  items: InventoryItem[] = [];
+  constructor(private inventoryService: InventoryService) {}
+  ngOnInit(): void {
+    this.inventoryService.getAll().subscribe(data => this.items = data);
+  }
 }

@@ -44,8 +44,15 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/deduct")]
     public async Task<IActionResult> DeductStock(int productId, [FromBody] DeductRequest request)
     {
+        var inventory = await _inventoryService.GetInventoryByProductIdAsync(productId);
+        if (inventory is null)
+            return NotFound(new { error = $"No inventory record for product {productId}" });
+
         var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
-        return item is null ? BadRequest(new { error = $"Insufficient stock for product {productId}" }) : Ok(item);
+        if (item is null)
+            return Conflict(new { error = $"Insufficient stock for product {productId}" });
+
+        return Ok(item);
     }
 }
 
