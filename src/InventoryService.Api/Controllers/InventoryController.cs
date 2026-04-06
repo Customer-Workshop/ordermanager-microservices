@@ -27,15 +27,8 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        try
-        {
-            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-            return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+        return Ok(item);
     }
 
     [HttpPost("product/{productId}/deduct")]
@@ -45,10 +38,6 @@ public class InventoryController : ControllerBase
         {
             var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return Ok(item);
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { error = ex.Message });
         }
         catch (InvalidOperationException ex)
         {

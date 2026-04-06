@@ -39,8 +39,7 @@ public class InventoryItemService
             ?? throw new ArgumentException($"No inventory record for product {productId}");
 
         if (item.QuantityOnHand < quantity)
-            throw new InvalidOperationException(
-                $"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {quantity}");
+            throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}");
 
         item.QuantityOnHand -= quantity;
         await _context.SaveChangesAsync();

@@ -15,7 +15,3 @@ dist/
 .idea/
 .vscode/
 *.swp
-
-## OS
-.DS_Store
-Thumbs.db
