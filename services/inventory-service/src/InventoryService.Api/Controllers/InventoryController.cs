@@ -74,7 +74,26 @@ public class InventoryController : ControllerBase
         var items = await _inventoryService.GetLowStockItemsAsync();
         return Ok(items);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateInventoryRequest request)
+    {
+        var item = new InventoryService.Api.Models.InventoryItem
+        {
+            ProductId = request.ProductId,
+            QuantityOnHand = request.QuantityOnHand,
+            ReorderLevel = request.ReorderLevel,
+            WarehouseLocation = request.WarehouseLocation
+        };
+        var created = await _inventoryService.CreateInventoryItemAsync(item);
+        return CreatedAtAction(nameof(GetByProductId), new { productId = created.ProductId }, created);
+    }
 }
 
 public record RestockRequest(int Quantity);
 public record DeductRequest(int Quantity);
+public record CreateInventoryRequest(
+    int ProductId,
+    int QuantityOnHand,
+    int ReorderLevel = 10,
+    string WarehouseLocation = "");

@@ -59,4 +59,11 @@ public class InventoryItemService
             .Where(i => i.QuantityOnHand <= i.ReorderLevel)
             .ToListAsync();
     }
+
+    public async Task<InventoryItem> CreateInventoryItemAsync(InventoryItem item)
+    {
+        _context.InventoryItems.Add(item);
+        await _context.SaveChangesAsync();
+        return item;
+    }
 }
