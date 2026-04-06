@@ -56,6 +56,16 @@ public class InventoryController : ControllerBase
         }
     }
 
+    [HttpGet("product/{productId}/check")]
+    public async Task<IActionResult> CheckStock(int productId, [FromQuery] int quantity = 1)
+    {
+        var item = await _inventoryService.GetInventoryByProductIdAsync(productId);
+        if (item is null)
+            return NotFound(new { productId, quantity, available = false });
+        var available = item.QuantityOnHand >= quantity;
+        return Ok(new { productId, quantity, available });
+    }
+
     [HttpGet("low-stock")]
     public async Task<IActionResult> GetLowStock() => Ok(await _inventoryService.GetLowStockItemsAsync());
 }
