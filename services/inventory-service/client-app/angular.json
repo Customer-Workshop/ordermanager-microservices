@@ -24,10 +24,14 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
+            "buildTarget": "inventory-client:build",
             "proxyConfig": "proxy.conf.json"
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
