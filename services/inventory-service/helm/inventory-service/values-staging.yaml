@@ -1,0 +1,15 @@
+replicaCount: 2
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 3
+
+ingress:
+  hosts:
+    - host: inventory-staging.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  ASPNETCORE_ENVIRONMENT: Staging

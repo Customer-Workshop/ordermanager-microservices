@@ -1,0 +1,15 @@
+replicaCount: 1
+
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 2
+
+ingress:
+  hosts:
+    - host: inventory-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  ASPNETCORE_ENVIRONMENT: Development
