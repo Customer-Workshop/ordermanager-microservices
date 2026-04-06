@@ -1,0 +1,22 @@
+replicaCount: 1
+
+ingress:
+  hosts:
+    - host: inventory-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+autoscaling:
+  enabled: false
+
+env:
+  ASPNETCORE_ENVIRONMENT: Development

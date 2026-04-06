@@ -1,0 +1,24 @@
+replicaCount: 2
+
+ingress:
+  hosts:
+    - host: inventory-staging.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+
+env:
+  ASPNETCORE_ENVIRONMENT: Staging
