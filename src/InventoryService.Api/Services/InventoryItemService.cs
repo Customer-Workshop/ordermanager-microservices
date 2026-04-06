@@ -15,16 +15,19 @@ public class InventoryItemService
 
     public async Task<List<InventoryItem>> GetAllInventoryAsync()
     {
-        return await _context.InventoryItems.ToListAsync();
+        return await _context.InventoryItems.Include(i => i.Product).ToListAsync();
     }
 
     public async Task<InventoryItem?> GetInventoryByProductIdAsync(int productId)
     {
-        return await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        return await _context.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == productId);
     }
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Restock quantity must be positive");
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;
@@ -35,6 +38,9 @@ public class InventoryItemService
 
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Deduction quantity must be positive");
+
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
 
@@ -49,6 +55,7 @@ public class InventoryItemService
     public async Task<List<InventoryItem>> GetLowStockItemsAsync()
     {
         return await _context.InventoryItems
+            .Include(i => i.Product)
             .Where(i => i.QuantityOnHand <= i.ReorderLevel)
             .ToListAsync();
     }

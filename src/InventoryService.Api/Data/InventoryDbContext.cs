@@ -7,16 +7,23 @@ public class InventoryDbContext : DbContext
 {
     public InventoryDbContext(DbContextOptions<InventoryDbContext> options) : base(options) { }
 
+    public DbSet<Product> Products => Set<Product>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Sku).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.Sku).IsUnique();
+        });
+
         modelBuilder.Entity<InventoryItem>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.ProductId).IsUnique();
-            entity.Property(e => e.ProductName).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.WarehouseLocation).HasMaxLength(50);
+            entity.HasOne(e => e.Product).WithOne(p => p.Inventory).HasForeignKey<InventoryItem>(e => e.ProductId);
         });
     }
 }

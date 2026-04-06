@@ -1,0 +1,13 @@
+replicaCount: 2
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: "Staging"
+  - name: ASPNETCORE_URLS
+    value: "http://+:8080"
