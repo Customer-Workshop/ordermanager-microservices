@@ -25,7 +25,10 @@ public class InventoryItemService
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be positive", nameof(quantity));
+
+        var item = await _context.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;
         item.LastRestocked = DateTime.UtcNow;
@@ -35,6 +38,9 @@ public class InventoryItemService
 
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be positive", nameof(quantity));
+
         var item = await _context.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
 
