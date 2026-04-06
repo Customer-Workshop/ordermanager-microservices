@@ -1,0 +1,49 @@
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
+
+@Component({
+  selector: 'app-low-stock',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <h2>Low Stock Items</h2>
+    <table *ngIf="items.length">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>On Hand</th>
+          <th>Reorder Level</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of items" class="low-stock">
+          <td>{{i.product?.name}}</td>
+          <td>{{i.product?.sku}}</td>
+          <td>{{i.quantityOnHand}}</td>
+          <td>{{i.reorderLevel}}</td>
+          <td>{{i.warehouseLocation}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!items.length">No low stock items.</p>
+  `,
+  styles: [`
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .low-stock { background-color: #ffe0e0; }
+  `]
+})
+export class LowStockComponent implements OnInit {
+  items: any[] = [];
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<any[]>(`${environment.apiUrl}/api/inventory/low-stock`).subscribe(data => this.items = data);
+  }
+}
