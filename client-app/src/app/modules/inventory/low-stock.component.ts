@@ -1,0 +1,42 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { InventoryService, InventoryItem } from './inventory.service';
+
+@Component({
+  selector: 'app-low-stock',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <h2>Low Stock Items</h2>
+    <table *ngIf="items.length">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>SKU</th>
+          <th>On Hand</th>
+          <th>Reorder Level</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of items" class="low-stock">
+          <td>{{i.productName}}</td>
+          <td>{{i.productSku}}</td>
+          <td>{{i.quantityOnHand}}</td>
+          <td>{{i.reorderLevel}}</td>
+          <td>{{i.warehouseLocation}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!items.length">No low stock items.</p>
+  `
+})
+export class LowStockComponent implements OnInit {
+  items: InventoryItem[] = [];
+
+  constructor(private inventoryService: InventoryService) {}
+
+  ngOnInit() {
+    this.inventoryService.getLowStock().subscribe(data => this.items = data);
+  }
+}
