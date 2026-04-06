@@ -1,0 +1,15 @@
+## .NET
+bin/
+obj/
+*.db
+
+## Node
+node_modules/
+dist/
+package-lock.json
+
+## IDE
+.vs/
+.vscode/
+*.user
+*.suo
