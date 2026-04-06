@@ -27,6 +27,8 @@ public class InventoryItemService
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.");
         item.QuantityOnHand += quantity;
         item.LastRestocked = DateTime.UtcNow;
         await _context.SaveChangesAsync();
@@ -37,6 +39,9 @@ public class InventoryItemService
     {
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
+
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.");
 
         if (item.QuantityOnHand < quantity)
             throw new InvalidOperationException(

@@ -36,9 +36,20 @@ spec:
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "inventory-service.fullname" . }}-data
+      {{- end }}
