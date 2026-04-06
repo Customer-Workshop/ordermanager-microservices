@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-microservices.git
+    repoURL: https://github.com/Cognition-Partner-Workshops/app_dotnet-angular-microservices
     targetRevision: main
     path: services/inventory-service/helm/inventory-service
     helm:

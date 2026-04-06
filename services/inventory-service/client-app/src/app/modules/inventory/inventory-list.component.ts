@@ -13,7 +13,6 @@ import { FormsModule } from '@angular/forms';
       <thead>
         <tr>
           <th>Product</th>
-          <th>SKU</th>
           <th>On Hand</th>
           <th>Reorder Level</th>
           <th>Location</th>
@@ -23,20 +22,19 @@ import { FormsModule } from '@angular/forms';
       </thead>
       <tbody>
         <tr *ngFor="let i of items" [class.low-stock]="i.quantityOnHand <= i.reorderLevel">
-          <td>{{i.product?.name}}</td>
-          <td>{{i.product?.sku}}</td>
+          <td>{{i.productName}}</td>
           <td>{{i.quantityOnHand}}</td>
           <td>{{i.reorderLevel}}</td>
           <td>{{i.warehouseLocation}}</td>
           <td>{{i.lastRestocked | date}}</td>
           <td>
-            <input type="number" [(ngModel)]="restockQuantities[i.productId]" min="1" placeholder="Qty" style="width:60px">
+            <input type="number" [(ngModel)]="restockQuantities[i.productId]" placeholder="Qty" min="1" style="width:60px">
             <button (click)="restock(i.productId)">Restock</button>
           </td>
         </tr>
       </tbody>
     </table>
-    <p *ngIf="!items.length">Loading inventory...</p>
+    <p *ngIf="!items.length">No inventory items found.</p>
   `
 })
 export class InventoryListComponent implements OnInit {
@@ -56,7 +54,7 @@ export class InventoryListComponent implements OnInit {
   restock(productId: number) {
     const qty = this.restockQuantities[productId];
     if (!qty || qty < 1) return;
-    this.http.post(`/api/inventory/product/${productId}/restock`, { quantity: qty })
+    this.http.post('/api/inventory/product/' + productId + '/restock', { quantity: qty })
       .subscribe(() => {
         this.restockQuantities[productId] = 0;
         this.loadInventory();

@@ -11,42 +11,29 @@ service:
   targetPort: 8080
 
 ingress:
-  enabled: true
+  enabled: false
   className: nginx
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-staging
-  hosts:
-    - host: inventory-service.workshop.local
-      paths:
-        - path: /
-          pathType: Prefix
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts: []
 
 resources:
   requests:
     cpu: 100m
-    memory: 256Mi
+    memory: 128Mi
   limits:
     cpu: 500m
-    memory: 512Mi
+    memory: 256Mi
 
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
-
-env:
-  - name: ASPNETCORE_ENVIRONMENT
-    value: Production
-  - name: ConnectionStrings__DefaultConnection
-    value: "Data Source=/data/inventory.db"
-
-persistence:
-  enabled: true
-  size: 1Gi
-  storageClass: gp2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 75
 
 monitoring:
   enabled: true
-  path: /metrics
   port: 8080
+  path: /metrics
+
+env: []

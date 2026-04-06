@@ -10,12 +10,12 @@ RUN npm run build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS api-build
 WORKDIR /src
 COPY InventoryService.sln ./
-COPY InventoryService/InventoryService.csproj InventoryService/
-COPY tests/InventoryService.Tests/InventoryService.Tests.csproj tests/InventoryService.Tests/
+COPY src/InventoryService.Api/InventoryService.Api.csproj src/InventoryService.Api/
+COPY tests/InventoryService.Api.Tests/InventoryService.Api.Tests.csproj tests/InventoryService.Api.Tests/
 RUN dotnet restore
 COPY . .
-COPY --from=client-build /app/client/dist/client-app/browser InventoryService/wwwroot/
-RUN dotnet publish InventoryService/InventoryService.csproj -c Release -o /app/publish
+COPY --from=client-build /app/client/dist/client-app/browser src/InventoryService.Api/wwwroot/
+RUN dotnet publish src/InventoryService.Api/InventoryService.Api.csproj -c Release -o /app/publish
 
 # Stage 3: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
@@ -23,4 +23,4 @@ WORKDIR /app
 COPY --from=api-build /app/publish .
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
-ENTRYPOINT ["dotnet", "InventoryService.dll"]
+ENTRYPOINT ["dotnet", "InventoryService.Api.dll"]

@@ -1,4 +1,4 @@
-name: "Inventory Service: Build and Push to ECR"
+name: Build and Push Inventory Service
 
 on:
   push:
@@ -11,15 +11,17 @@ on:
       - 'services/inventory-service/**'
 
 env:
-  AWS_REGION: us-east-1
   ECR_REGISTRY: 599083837640.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: workshop/inventory-service
-  IMAGE_TAG: ${{ github.sha }}
-  SERVICE_PATH: services/inventory-service
+  AWS_REGION: us-east-1
 
 jobs:
-  build-and-test:
+  build-and-push:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/inventory-service
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,42 +32,30 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        working-directory: ${{ env.SERVICE_PATH }}
         run: dotnet restore
 
       - name: Build
-        working-directory: ${{ env.SERVICE_PATH }}
         run: dotnet build --no-restore --configuration Release
 
-      - name: Run tests
-        working-directory: ${{ env.SERVICE_PATH }}
+      - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal
 
-  build-and-push:
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Configure AWS credentials
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::599083837640:role/github-actions-ecr-push
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push Docker image
-        working-directory: ${{ env.SERVICE_PATH }}
+      - name: Build, tag, and push image to ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          docker build -f docker/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -f docker/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest

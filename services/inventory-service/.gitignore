@@ -1,7 +1,11 @@
 bin/
 obj/
+*.user
+*.suo
+.vs/
 node_modules/
 dist/
+.angular/
 *.db
-*.user
-.vs/
+appsettings.Development.json
+package-lock.json
