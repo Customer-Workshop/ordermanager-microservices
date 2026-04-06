@@ -1,0 +1,43 @@
+replicaCount: 2
+
+image:
+  repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/inventory-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Production
+  - name: INVENTORY_DB_CONNECTION
+    valueFrom:
+      secretKeyRef:
+        name: inventory-service-db
+        key: connection-string
+
+monitoring:
+  enabled: true
+  path: /metrics
+  port: 8080
+
+networkPolicy:
+  enabled: true
+  monolithNamespace: decomposition-dev

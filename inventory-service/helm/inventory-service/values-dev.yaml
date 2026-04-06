@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  tag: dev-latest
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Development
+  - name: INVENTORY_DB_CONNECTION
+    value: "Data Source=inventory.db"
+
+networkPolicy:
+  monolithNamespace: decomposition-dev
