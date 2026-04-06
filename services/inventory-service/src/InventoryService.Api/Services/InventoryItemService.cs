@@ -26,7 +26,7 @@ public class InventoryItemService
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        var item = await _context.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item == null) throw new KeyNotFoundException($"No inventory found for product {productId}");
 
         item.QuantityOnHand += quantity;
@@ -37,7 +37,7 @@ public class InventoryItemService
 
     public async Task<InventoryItem> DeductStockAsync(int productId, int quantity)
     {
-        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId);
+        var item = await _context.InventoryItems.Include(i => i.Product).FirstOrDefaultAsync(i => i.ProductId == productId);
         if (item == null) throw new KeyNotFoundException($"No inventory found for product {productId}");
         if (item.QuantityOnHand < quantity)
             throw new InvalidOperationException($"Insufficient stock for product {productId}. Available: {item.QuantityOnHand}, Requested: {quantity}");
