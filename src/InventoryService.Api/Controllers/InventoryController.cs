@@ -70,7 +70,7 @@ public class InventoryController : ControllerBase
     }
 
     /// <summary>Deduct stock for a product and return the updated item (used by monolith OrderService).</summary>
-    [HttpPost("product/{productId}/decrement")]
+    [HttpPost("product/{productId}/deduct")]
     [ProducesResponseType(typeof(InventoryItem), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
