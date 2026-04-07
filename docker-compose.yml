@@ -26,7 +26,7 @@ services:
     ports:
       - "5003:8080"
     environment:
-      - ProductService__BaseUrl=http://product-service:8080
+      - PRODUCT_SERVICE_URL=http://product-service:8080
     depends_on:
       - product-service
     volumes:
@@ -39,9 +39,9 @@ services:
     ports:
       - "5004:8080"
     environment:
-      - CustomerService__BaseUrl=http://customer-service:8080
-      - ProductService__BaseUrl=http://product-service:8080
-      - InventoryService__BaseUrl=http://inventory-service:8080
+      - CUSTOMER_SERVICE_URL=http://customer-service:8080
+      - PRODUCT_SERVICE_URL=http://product-service:8080
+      - INVENTORY_SERVICE_URL=http://inventory-service:8080
     depends_on:
       - customer-service
       - product-service
