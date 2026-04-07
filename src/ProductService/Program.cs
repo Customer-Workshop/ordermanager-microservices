@@ -17,9 +17,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
-// Configure EF Core with PostgreSQL
+// Configure EF Core with SQLite
+var dbPath = Path.Combine("/data", "products.db");
 builder.Services.AddDbContext<ProductDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // Register application services
 builder.Services.AddScoped<ProductSvc>();

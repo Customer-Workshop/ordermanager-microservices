@@ -13,9 +13,10 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// Configure EF Core with PostgreSQL
+// Configure EF Core with SQLite
+var dbPath = Path.Combine("/data", "customers.db");
 builder.Services.AddDbContext<CustomerDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // Register services
 builder.Services.AddScoped<CustomerSvc>();

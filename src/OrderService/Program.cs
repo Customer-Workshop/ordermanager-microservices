@@ -14,9 +14,10 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// Configure EF Core with PostgreSQL
+// Configure EF Core with SQLite
+var dbPath = Path.Combine("/data", "orders.db");
 builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // Register typed HTTP clients
 builder.Services.AddHttpClient<CustomerClient>(c =>
@@ -48,6 +49,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+    context.Database.EnsureCreated();
+}
 
 // Middleware
 app.UseSwagger();

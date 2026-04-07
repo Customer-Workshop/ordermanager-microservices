@@ -16,9 +16,10 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure EF Core with PostgreSQL
+// Configure EF Core with SQLite
+var dbPath = Path.Combine("/data", "inventory.db");
 builder.Services.AddDbContext<InventoryDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 // Register HttpClient for Product Service
 var productServiceUrl = builder.Configuration["PRODUCT_SERVICE_URL"] ?? "http://localhost:5002";
