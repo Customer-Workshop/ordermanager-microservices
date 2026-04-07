@@ -24,7 +24,7 @@ def scrape_bbc_business(scraper: WebScraper) -> NewsData:
     data = NewsData()
 
     urls = [
-        "https://www.bbc.co.uk/news/topics/clm1wxp5pvlt",
+        "https://www.bbc.co.uk/news/business",
         "https://www.bbc.co.uk/news/business/economy",
     ]
 
@@ -32,6 +32,11 @@ def scrape_bbc_business(scraper: WebScraper) -> NewsData:
         page = scraper.scrape_url(url, "BBC Business", use_selenium=True)
         if page is None:
             logger.warning("Could not scrape BBC page: %s", url)
+            continue
+
+        # Skip error / near-empty pages
+        if len(page.text_content) < 200 or "404" in page.title:
+            logger.warning("Skipping low-content BBC page: %s", url)
             continue
 
         data.raw_pages.append(page)

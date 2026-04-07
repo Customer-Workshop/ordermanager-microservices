@@ -30,17 +30,22 @@ def scrape_moneyfacts(scraper: WebScraper) -> SavingsRateData:
 
     pages_to_scrape = [
         ("https://moneyfacts.co.uk/savings-accounts/", "general"),
-        ("https://moneyfacts.co.uk/savings-accounts/isa/", "isa"),
+        ("https://moneyfacts.co.uk/savings-accounts/cash-isas/", "isa"),
         ("https://moneyfacts.co.uk/savings-accounts/fixed-rate-bonds/", "fixed"),
-        ("https://moneyfacts.co.uk/savings-accounts/easy-access/", "easy_access"),
+        ("https://moneyfacts.co.uk/savings-accounts/easy-access-accounts/", "easy_access"),
         ("https://moneyfacts.co.uk/savings-accounts/notice-accounts/", "notice"),
-        ("https://moneyfacts.co.uk/savings-accounts/regular-savings/", "regular"),
+        ("https://moneyfacts.co.uk/savings-accounts/regular-savings-accounts/", "regular"),
     ]
 
     for url, page_type in pages_to_scrape:
         page = scraper.scrape_url(url, "Moneyfacts", use_selenium=True)
         if page is None:
             logger.warning("Could not scrape Moneyfacts page: %s", url)
+            continue
+
+        # Skip error / near-empty pages
+        if len(page.text_content) < 200 or "404" in page.title:
+            logger.warning("Skipping low-content page: %s (%s)", url, page.title)
             continue
 
         data.raw_pages.append(page)

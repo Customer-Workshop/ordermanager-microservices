@@ -26,11 +26,11 @@ def scrape_fca(scraper: WebScraper) -> RegulatoryData:
 
     pages_to_scrape = [
         (
-            "https://www.fca.org.uk/news/search?start=&end=&type=all&topic=savings-investments",
+            "https://www.fca.org.uk/news",
             "news",
         ),
         (
-            "https://www.fca.org.uk/consumers/savings-accounts",
+            "https://www.fca.org.uk/consumers/savings-and-investments",
             "guidance",
         ),
         (
@@ -43,6 +43,11 @@ def scrape_fca(scraper: WebScraper) -> RegulatoryData:
         page = scraper.scrape_url(url, "FCA", use_selenium=True)
         if page is None:
             logger.warning("Could not scrape FCA page: %s", url)
+            continue
+
+        # Skip error / near-empty pages
+        if len(page.text_content) < 200 or "not found" in page.title.lower():
+            logger.warning("Skipping low-content FCA page: %s", url)
             continue
 
         data.raw_pages.append(page)
