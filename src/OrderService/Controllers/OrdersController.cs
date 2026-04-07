@@ -27,16 +27,34 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest request)
     {
-        var items = request.Items.Select(i => (i.ProductId, i.Quantity)).ToList();
-        var order = await _orderService.CreateOrderAsync(request.CustomerId, items);
-        return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+        try
+        {
+            var items = request.Items.Select(i => (i.ProductId, i.Quantity)).ToList();
+            var order = await _orderService.CreateOrderAsync(request.CustomerId, items);
+            return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request)
     {
-        var order = await _orderService.UpdateOrderStatusAsync(id, request.Status);
-        return Ok(order);
+        try
+        {
+            var order = await _orderService.UpdateOrderStatusAsync(id, request.Status);
+            return Ok(order);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
     }
 }
 
