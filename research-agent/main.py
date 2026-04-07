@@ -133,9 +133,6 @@ def main() -> None:
 
     if args.scrape_only:
         console.print("[bold yellow]Running in scrape-only mode[/bold yellow]")
-        from scraper import WebScraper
-
-        scraper = WebScraper(scraper_config)
         try:
             data = agent._scrape_all_sources()
             console.print(
@@ -148,7 +145,7 @@ def main() -> None:
                     f"({len(page.text_content)} chars)"
                 )
         finally:
-            scraper.close()
+            agent.scraper.close()
     else:
         report_path = agent.run()
         console.print(
