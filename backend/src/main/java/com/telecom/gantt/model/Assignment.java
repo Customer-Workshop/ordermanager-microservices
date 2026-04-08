@@ -1,5 +1,6 @@
 package com.telecom.gantt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "technician_id", nullable = false)
+    @JsonIgnoreProperties({"market", "hibernateLazyInitializer", "handler"})
     private Technician technician;
 
     @Column(name = "technician_id", insertable = false, updatable = false)
@@ -21,6 +23,7 @@ public class Assignment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "job_id")
+    @JsonIgnoreProperties({"market", "hibernateLazyInitializer", "handler"})
     private Job job;
 
     @Column(name = "job_id", insertable = false, updatable = false)

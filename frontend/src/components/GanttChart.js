@@ -9,6 +9,7 @@ function GanttChart({ territoryId, marketIds, date }) {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const initialized = useRef(false);
+  const marketIdsKey = marketIds ? marketIds.join(',') : '';
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -208,7 +209,7 @@ function GanttChart({ territoryId, marketIds, date }) {
           setLoading(false);
         });
     }
-  }, [territoryId, marketIds, date, showToast]);
+  }, [territoryId, marketIdsKey, date, showToast]); // marketIdsKey is a stable string derived from marketIds
 
   return (
     <div className="gantt-container">
