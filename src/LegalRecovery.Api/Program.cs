@@ -1,5 +1,7 @@
 using LegalRecovery.Application;
 using LegalRecovery.Infrastructure;
+using LegalRecovery.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,26 @@ builder.Services.AddCors(options =>
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+// Auto-migrate and seed database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        await context.Database.MigrateAsync();
+        logger.LogInformation("Database migrated successfully.");
+        await SeedData.SeedAsync(context, logger);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+        throw;
+    }
+}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
