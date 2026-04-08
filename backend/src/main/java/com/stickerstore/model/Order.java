@@ -35,6 +35,11 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    private String shippingName;
+    private String shippingAddress;
+    private String shippingCity;
+    private String shippingZip;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();

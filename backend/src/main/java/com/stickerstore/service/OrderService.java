@@ -1,5 +1,6 @@
 package com.stickerstore.service;
 
+import com.stickerstore.dto.CheckoutRequest;
 import com.stickerstore.dto.OrderItemResponse;
 import com.stickerstore.dto.OrderResponse;
 import com.stickerstore.exception.BadRequestException;
@@ -25,7 +26,7 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public OrderResponse checkout(Long userId) {
+    public OrderResponse checkout(Long userId, CheckoutRequest request) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
@@ -33,11 +34,20 @@ public class OrderService {
             throw new BadRequestException("Cart is empty");
         }
 
-        Order order = Order.builder()
+        Order.OrderBuilder orderBuilder = Order.builder()
                 .user(cart.getUser())
                 .status(OrderStatus.CONFIRMED)
-                .totalAmount(BigDecimal.ZERO)
-                .build();
+                .totalAmount(BigDecimal.ZERO);
+
+        if (request != null) {
+            orderBuilder
+                    .shippingName(request.getShippingName())
+                    .shippingAddress(request.getShippingAddress())
+                    .shippingCity(request.getShippingCity())
+                    .shippingZip(request.getShippingZip());
+        }
+
+        Order order = orderBuilder.build();
 
         BigDecimal total = BigDecimal.ZERO;
 

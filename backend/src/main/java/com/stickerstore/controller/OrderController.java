@@ -1,5 +1,6 @@
 package com.stickerstore.controller;
 
+import com.stickerstore.dto.CheckoutRequest;
 import com.stickerstore.dto.OrderResponse;
 import com.stickerstore.model.User;
 import com.stickerstore.repository.UserRepository;
@@ -21,9 +22,11 @@ public class OrderController {
     private final UserRepository userRepository;
 
     @PostMapping("/checkout")
-    public ResponseEntity<OrderResponse> checkout(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<OrderResponse> checkout(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody(required = false) CheckoutRequest request) {
         Long userId = getUserId(userDetails);
-        return ResponseEntity.ok(orderService.checkout(userId));
+        return ResponseEntity.ok(orderService.checkout(userId, request));
     }
 
     @GetMapping
