@@ -1,6 +1,31 @@
 @CustomerService.Api_HostAddress = http://localhost:5258
 
-GET {{CustomerService.Api_HostAddress}}/weatherforecast/
+GET {{CustomerService.Api_HostAddress}}/api/customers
+Accept: application/json
+
+###
+
+GET {{CustomerService.Api_HostAddress}}/api/customers/1
+Accept: application/json
+
+###
+
+POST {{CustomerService.Api_HostAddress}}/api/customers
+Content-Type: application/json
+
+{
+    "name": "New Corp",
+    "email": "info@newcorp.com",
+    "phone": "555-0400",
+    "address": "321 Elm St",
+    "city": "Chicago",
+    "state": "IL",
+    "zipCode": "60601"
+}
+
+###
+
+GET {{CustomerService.Api_HostAddress}}/health
 Accept: application/json
 
 ###
