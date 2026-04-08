@@ -25,6 +25,8 @@ public class CustomerDataService
 
     public async Task<Customer> CreateCustomerAsync(Customer customer)
     {
+        customer.Id = 0;
+        customer.CreatedAt = DateTime.UtcNow;
         _context.Customers.Add(customer);
         await _context.SaveChangesAsync();
         return customer;
