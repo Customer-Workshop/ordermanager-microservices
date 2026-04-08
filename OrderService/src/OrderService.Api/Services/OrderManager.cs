@@ -54,7 +54,7 @@ public class OrderManager
 
     public async Task<Order?> UpdateOrderStatusAsync(int orderId, string status)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        var order = await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is null) return null;
         order.Status = status;
         await _context.SaveChangesAsync();
