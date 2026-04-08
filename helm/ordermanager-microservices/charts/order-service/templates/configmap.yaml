@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "order-service.fullname" . }}-config
+  labels:
+    {{- include "order-service.labels" . | nindent 4 }}
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+  Services__ProductService: "http://{{ .Release.Name }}-product-service"
+  Services__CustomerService: "http://{{ .Release.Name }}-customer-service"
+  Services__InventoryService: "http://{{ .Release.Name }}-inventory-service"

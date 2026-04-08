@@ -1,0 +1,26 @@
+apiVersion: v2
+name: ordermanager-microservices
+description: Parent Helm chart for the OrderManager decomposed microservices
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: product-service
+    version: 0.1.0
+    repository: file://charts/product-service
+  - name: customer-service
+    version: 0.1.0
+    repository: file://charts/customer-service
+  - name: inventory-service
+    version: 0.1.0
+    repository: file://charts/inventory-service
+  - name: order-service
+    version: 0.1.0
+    repository: file://charts/order-service
+  - name: api-gateway
+    version: 0.1.0
+    repository: file://charts/api-gateway
+  - name: web-frontend
+    version: 0.1.0
+    repository: file://charts/web-frontend

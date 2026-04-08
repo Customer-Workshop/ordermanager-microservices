@@ -1,0 +1,294 @@
+global:
+  namespace: decomposition-dev
+  image:
+    registry: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop
+    pullPolicy: IfNotPresent
+    tag: latest
+  labels:
+    "app.kubernetes.io/managed-by": Helm
+    "platform/environment": dev
+    "platform/team": ordermanager
+
+product-service:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/product-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: product-service.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: product-service-tls
+        hosts:
+          - product-service.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: "http://+:8080"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080
+
+customer-service:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/customer-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: customer-service.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: customer-service-tls
+        hosts:
+          - customer-service.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: "http://+:8080"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080
+
+inventory-service:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/inventory-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: inventory-service.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: inventory-service-tls
+        hosts:
+          - inventory-service.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: "http://+:8080"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080
+
+order-service:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/order-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: order-service.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: order-service-tls
+        hosts:
+          - order-service.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: "http://+:8080"
+    - name: Services__ProductService
+      value: "http://ordermanager-microservices-product-service"
+    - name: Services__CustomerService
+      value: "http://ordermanager-microservices-customer-service"
+    - name: Services__InventoryService
+      value: "http://ordermanager-microservices-inventory-service"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080
+
+api-gateway:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/api-gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: api-gateway.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: api-gateway-tls
+        hosts:
+          - api-gateway.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: "http://+:8080"
+  yarp:
+    routes:
+      products:
+        clusterId: product-cluster
+        match:
+          path: "/api/products/{**catch-all}"
+      customers:
+        clusterId: customer-cluster
+        match:
+          path: "/api/customers/{**catch-all}"
+      inventory:
+        clusterId: inventory-cluster
+        match:
+          path: "/api/inventory/{**catch-all}"
+      orders:
+        clusterId: order-cluster
+        match:
+          path: "/api/orders/{**catch-all}"
+    clusters:
+      product-cluster:
+        destinations:
+          destination1:
+            address: "http://ordermanager-microservices-product-service"
+      customer-cluster:
+        destinations:
+          destination1:
+            address: "http://ordermanager-microservices-customer-service"
+      inventory-cluster:
+        destinations:
+          destination1:
+            address: "http://ordermanager-microservices-inventory-service"
+      order-cluster:
+        destinations:
+          destination1:
+            address: "http://ordermanager-microservices-order-service"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080
+
+web-frontend:
+  replicaCount: 1
+  image:
+    repository: 599083837640.dkr.ecr.us-east-1.amazonaws.com/workshop/web-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+    hosts:
+      - host: web-frontend.workshop.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: web-frontend-tls
+        hosts:
+          - web-frontend.workshop.local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  nginx:
+    apiGatewayUrl: "http://ordermanager-microservices-api-gateway"
+  monitoring:
+    enabled: true
+    path: /metrics
+    port: 8080

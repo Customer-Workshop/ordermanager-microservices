@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api-gateway.fullname" . }}-yarp
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+data:
+  ReverseProxy__Routes__products__ClusterId: {{ .Values.yarp.routes.products.clusterId | quote }}
+  ReverseProxy__Routes__products__Match__Path: {{ .Values.yarp.routes.products.match.path | quote }}
+  ReverseProxy__Routes__customers__ClusterId: {{ .Values.yarp.routes.customers.clusterId | quote }}
+  ReverseProxy__Routes__customers__Match__Path: {{ .Values.yarp.routes.customers.match.path | quote }}
+  ReverseProxy__Routes__inventory__ClusterId: {{ .Values.yarp.routes.inventory.clusterId | quote }}
+  ReverseProxy__Routes__inventory__Match__Path: {{ .Values.yarp.routes.inventory.match.path | quote }}
+  ReverseProxy__Routes__orders__ClusterId: {{ .Values.yarp.routes.orders.clusterId | quote }}
+  ReverseProxy__Routes__orders__Match__Path: {{ .Values.yarp.routes.orders.match.path | quote }}
+  ReverseProxy__Clusters__product-cluster__Destinations__destination1__Address: {{ (index .Values.yarp.clusters "product-cluster").destinations.destination1.address | quote }}
+  ReverseProxy__Clusters__customer-cluster__Destinations__destination1__Address: {{ (index .Values.yarp.clusters "customer-cluster").destinations.destination1.address | quote }}
+  ReverseProxy__Clusters__inventory-cluster__Destinations__destination1__Address: {{ (index .Values.yarp.clusters "inventory-cluster").destinations.destination1.address | quote }}
+  ReverseProxy__Clusters__order-cluster__Destinations__destination1__Address: {{ (index .Values.yarp.clusters "order-cluster").destinations.destination1.address | quote }}
