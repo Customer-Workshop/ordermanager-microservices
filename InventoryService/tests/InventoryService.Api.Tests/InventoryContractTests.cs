@@ -141,6 +141,19 @@ public class InventoryContractTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal(75, item.QuantityOnHand);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public async Task Restock_ReturnsBadRequest_WhenQuantityNotPositive(int quantity)
+    {
+        var client = CreateSeededClient();
+        var request = new { Quantity = quantity };
+
+        var response = await client.PostAsJsonAsync("/api/inventory/product/1/restock", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Fact]
     public async Task Restock_ReturnsNotFound_WhenProductDoesNotExist()
     {

@@ -25,6 +25,8 @@ public class InventoryManager
 
     public async Task<InventoryItem> RestockAsync(int productId, int quantity)
     {
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Restock quantity must be positive.");
         var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ProductId == productId)
             ?? throw new ArgumentException($"No inventory record for product {productId}");
         item.QuantityOnHand += quantity;

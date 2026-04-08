@@ -32,6 +32,10 @@ public class InventoryController : ControllerBase
             var item = await _inventoryManager.RestockAsync(productId, request.Quantity);
             return Ok(item);
         }
+        catch (ArgumentOutOfRangeException)
+        {
+            return BadRequest(new { error = "Restock quantity must be positive." });
+        }
         catch (ArgumentException)
         {
             return NotFound();
