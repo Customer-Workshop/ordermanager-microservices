@@ -1,0 +1,6 @@
+apiVersion: v2
+name: legal-recovery
+description: Legal Recovery Platform - Manages legal debt recovery across 9 process stages
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

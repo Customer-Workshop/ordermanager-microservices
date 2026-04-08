@@ -1,0 +1,15 @@
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+
+env:
+  ASPNETCORE_ENVIRONMENT: Development
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
