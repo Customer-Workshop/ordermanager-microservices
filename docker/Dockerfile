@@ -14,7 +14,7 @@ COPY services/inventory-service/src/InventoryService.Api/InventoryService.Api.cs
 COPY services/inventory-service/tests/InventoryService.Api.Tests/InventoryService.Api.Tests.csproj tests/InventoryService.Api.Tests/
 RUN dotnet restore
 COPY services/inventory-service/ .
-COPY --from=client-build /app/client/dist/inventory-client/browser src/InventoryService.Api/wwwroot/
+COPY --from=client-build /app/src/InventoryService.Api/wwwroot/ src/InventoryService.Api/wwwroot/
 RUN dotnet publish src/InventoryService.Api/InventoryService.Api.csproj -c Release -o /app/publish
 
 # Stage 3: Runtime

@@ -27,8 +27,19 @@ public class InventoryController : ControllerBase
     [HttpPost("product/{productId}/restock")]
     public async Task<IActionResult> Restock(int productId, [FromBody] RestockRequest request)
     {
-        var item = await _inventoryService.RestockAsync(productId, request.Quantity);
-        return Ok(item);
+        try
+        {
+            var item = await _inventoryService.RestockAsync(productId, request.Quantity);
+            return Ok(item);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (ArgumentException)
+        {
+            return NotFound(new { error = $"No inventory record for product {productId}" });
+        }
     }
 
     [HttpPost("product/{productId}/deduct")]
@@ -38,6 +49,14 @@ public class InventoryController : ControllerBase
         {
             var item = await _inventoryService.DeductStockAsync(productId, request.Quantity);
             return Ok(item);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (ArgumentException)
+        {
+            return NotFound(new { error = $"No inventory record for product {productId}" });
         }
         catch (InvalidOperationException ex)
         {
