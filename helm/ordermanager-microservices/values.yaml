@@ -162,17 +162,6 @@ order-service:
     limits:
       cpu: 500m
       memory: 256Mi
-  env:
-    - name: ASPNETCORE_ENVIRONMENT
-      value: Production
-    - name: ASPNETCORE_URLS
-      value: "http://+:8080"
-    - name: Services__ProductService
-      value: "http://ordermanager-microservices-product-service"
-    - name: Services__CustomerService
-      value: "http://ordermanager-microservices-customer-service"
-    - name: Services__InventoryService
-      value: "http://ordermanager-microservices-inventory-service"
   monitoring:
     enabled: true
     path: /metrics

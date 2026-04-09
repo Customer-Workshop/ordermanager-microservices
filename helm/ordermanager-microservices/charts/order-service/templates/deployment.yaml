@@ -26,10 +26,9 @@ spec:
           env:
             {{- toYaml .Values.env | nindent 12 }}
           {{- end }}
-          {{- if .Values.envFrom }}
           envFrom:
-            {{- toYaml .Values.envFrom | nindent 12 }}
-          {{- end }}
+            - configMapRef:
+                name: {{ include "order-service.fullname" . }}-config
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
