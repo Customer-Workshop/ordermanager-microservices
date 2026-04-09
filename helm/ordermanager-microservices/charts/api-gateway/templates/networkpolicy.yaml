@@ -28,6 +28,11 @@ spec:
         - protocol: TCP
           port: {{ .Values.monitoring.port }}
     {{- end }}
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
   egress:
     - to: []
       ports:

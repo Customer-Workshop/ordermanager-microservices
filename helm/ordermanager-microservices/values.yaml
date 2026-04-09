@@ -5,9 +5,8 @@ global:
     pullPolicy: IfNotPresent
     tag: latest
   labels:
-    "app.kubernetes.io/managed-by": Helm
-    "platform/environment": dev
-    "platform/team": ordermanager
+    environment: dev
+    team: ordermanager
 
 product-service:
   replicaCount: 1
