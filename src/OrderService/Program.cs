@@ -61,3 +61,8 @@ app.MapHealthChecks("/health");
 app.MapMetrics();
 
 app.Run();
+
+namespace OrderService
+{
+    public partial class Program { }
+}

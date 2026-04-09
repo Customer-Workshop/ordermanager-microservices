@@ -59,3 +59,8 @@ app.MapHealthChecks("/health");
 app.MapMetrics();
 
 app.Run();
+
+namespace CustomerService
+{
+    public partial class Program { }
+}

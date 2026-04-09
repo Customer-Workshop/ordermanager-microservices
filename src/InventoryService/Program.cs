@@ -70,3 +70,8 @@ app.MapHealthChecks("/health");
 app.MapMetrics("/metrics");
 
 app.Run();
+
+namespace InventoryService
+{
+    public partial class Program { }
+}
