@@ -175,7 +175,7 @@ export default function DashboardPage() {
               <TableContainer component={Paper} elevation={0}>
                 <Table size="small">
                   <TableHead><TableRow>
-                    <TableCell>Location</TableCell><TableCell align="center">Type</TableCell><TableCell align="right">Requests</TableCell>
+                    <TableCell>Location</TableCell><TableCell align="center">Type</TableCell><TableCell align="right">Staffed positions</TableCell>
                   </TableRow></TableHead>
                   <TableBody>
                     {data.location_breakdown.length === 0 ? (
