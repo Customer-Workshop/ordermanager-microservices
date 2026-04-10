@@ -54,7 +54,7 @@ function App() {
     if (previousValue === null) {
       setPreviousValue(String(inputValue))
       setHistory(`${inputValue} ${getOperatorSymbol(nextOperator)}`)
-    } else if (operator) {
+    } else if (operator && !waitingForOperand) {
       const prevValue = parseFloat(previousValue)
       let result: number
 
@@ -79,6 +79,8 @@ function App() {
       setPreviousValue(resultStr)
       setDisplay(resultStr)
       setHistory(`${resultStr} ${getOperatorSymbol(nextOperator)}`)
+    } else {
+      setHistory(`${previousValue} ${getOperatorSymbol(nextOperator)}`)
     }
 
     setWaitingForOperand(true)
