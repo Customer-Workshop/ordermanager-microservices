@@ -47,13 +47,13 @@ export default function RolesPage() {
                   <TableRow key={r.id} hover>
                     <TableCell sx={{ fontWeight: 500 }}>{r.title}</TableCell>
                     <TableCell>{r.category}</TableCell>
-                    <TableCell>{r.min_experience}–{r.max_experience} yrs</TableCell>
+                    <TableCell>{r.experience_min}–{r.experience_max} yrs</TableCell>
                     <TableCell>
-                      {r.practice_unit ? (
-                        <Chip label={r.practice_unit.unit_code} size="small" sx={{ bgcolor: '#e0f7fa', color: '#00838f', fontWeight: 600, fontSize: 10 }} />
+                      {r.practice_unit_id ? (
+                        <Chip label={`PU-${r.practice_unit_id}`} size="small" sx={{ bgcolor: '#e0f7fa', color: '#00838f', fontWeight: 600, fontSize: 10 }} />
                       ) : '—'}
                     </TableCell>
-                    <TableCell><Chip label={r.is_active ? 'Active' : 'Inactive'} size="small" sx={{ bgcolor: r.is_active ? '#e8f5e9' : '#fafafa', color: r.is_active ? '#2e8540' : '#5a6872' }} /></TableCell>
+                    <TableCell><Chip label="Active" size="small" sx={{ bgcolor: '#e8f5e9', color: '#2e8540' }} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>

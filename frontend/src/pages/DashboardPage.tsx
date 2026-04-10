@@ -63,7 +63,7 @@ export default function DashboardPage() {
             {WAVES.map((wave) => {
               const pct = wave.positions > 0 ? (wave.filled / wave.positions) * 100 : 0;
               return (
-                <Grid size={{ xs: 6, md: 3 }} key={wave.name}>
+                <Grid item xs={6} md={3} key={wave.name}>
                   <Box sx={{ border: '1px solid #e0e3e6', borderRadius: 1.5, p: 1.5, borderLeft: `3px solid ${wave.color}` }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                       <Typography sx={{ fontWeight: 700, fontSize: 13, color: wave.color }}>{wave.name}</Typography>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
 
       <Grid container spacing={2} sx={{ mb: 2.5 }}>
         {statCards.map(({ label, value, icon, color, bg }) => (
-          <Grid size={{ xs: 6, md: 3 }} key={label}>
+          <Grid item xs={6} md={3} key={label}>
             <Card>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5, '&:last-child': { pb: 1.5 } }}>
                 <Box sx={{ bgcolor: bg, borderRadius: 2, p: 1, display: 'flex', color }}>{icon}</Box>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       </Grid>
 
       <Grid container spacing={2} sx={{ mb: 2.5 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ borderLeft: '4px solid #00838f' }}>
             <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ borderLeft: '4px solid #e87722' }}>
             <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
       </Card>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="h6" sx={{ fontSize: 14, mb: 1 }}>Locations (5 Sites)</Typography>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="h6" sx={{ fontSize: 14, mb: 1 }}>Practice Units</Typography>

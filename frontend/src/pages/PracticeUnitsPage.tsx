@@ -60,11 +60,11 @@ export default function PracticeUnitsPage() {
                   </TableRow>
                 )) : units.map((u) => (
                   <TableRow key={u.id} hover>
-                    <TableCell><Chip label={u.unit_code} size="small" sx={{ bgcolor: '#e0f7fa', color: '#00838f', fontWeight: 600, fontSize: 11 }} /></TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>{u.unit_name}</TableCell>
+                    <TableCell><Chip label={u.code} size="small" sx={{ bgcolor: '#e0f7fa', color: '#00838f', fontWeight: 600, fontSize: 11 }} /></TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{u.name}</TableCell>
                     <TableCell sx={{ color: '#5a6872' }}>{u.description || '\u2014'}</TableCell>
-                    <TableCell sx={{ color: '#5a6872' }}>{u.anchors?.length || 0} assigned</TableCell>
-                    <TableCell>{u.roles?.length || 0}</TableCell>
+                    <TableCell sx={{ color: '#5a6872' }}>0 assigned</TableCell>
+                    <TableCell>0</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
