@@ -2,11 +2,13 @@
 
 export interface Location {
   id: number;
+  name: string;
   city: string;
   state: string;
-  zip_code: string;
-  is_client_location: boolean;
-  is_active: boolean;
+  location_type: string;
+  address: string | null;
+  capacity: number | null;
+  created_at: string;
 }
 
 export interface PracticeUnit {
@@ -62,12 +64,14 @@ export interface CandidateSkill {
 
 export interface Candidate {
   id: number;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string | null;
   status: string;
-  experience_years: number;
-  current_location: string | null;
+  years_of_experience: number;
+  current_location_city: string | null;
+  current_location_state: string | null;
   preferred_location_id: number | null;
   resume_url: string | null;
   skills: CandidateSkill[];
@@ -75,12 +79,13 @@ export interface Candidate {
 
 export interface StaffingRequest {
   id: number;
+  title: string;
   wmt_reference_id: string | null;
   role_id: number;
   location_id: number;
   status: string;
   priority: string;
-  headcount: number;
+  number_of_positions: number;
   description: string | null;
   created_at: string;
   updated_at: string;

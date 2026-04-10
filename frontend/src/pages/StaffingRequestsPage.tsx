@@ -19,7 +19,7 @@ export default function StaffingRequestsPage() {
   const [requests, setRequests] = useState<StaffingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ role_id: 0, location_id: 0, headcount: 1, priority: 'medium', description: '' });
+  const [form, setForm] = useState({ title: '', role_id: 0, location_id: 0, number_of_positions: 1, priority: 'medium', description: '' });
 
   useEffect(() => {
     fetchStaffingRequests()
@@ -55,7 +55,7 @@ export default function StaffingRequestsPage() {
                   <TableCell>ID</TableCell>
                   <TableCell>WMT Ref</TableCell>
                   <TableCell>Priority</TableCell>
-                  <TableCell>Headcount</TableCell>
+                  <TableCell>Positions</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Created</TableCell>
                 </TableRow>
@@ -69,7 +69,7 @@ export default function StaffingRequestsPage() {
                       <TableCell>{req.id}</TableCell>
                       <TableCell>{req.wmt_reference_id || '—'}</TableCell>
                       <TableCell><Chip label={req.priority} size="small" /></TableCell>
-                      <TableCell>{req.headcount}</TableCell>
+                      <TableCell>{req.number_of_positions}</TableCell>
                       <TableCell>
                         <Chip label={req.status} size="small" color={STATUS_COLORS[req.status] || 'default'} />
                       </TableCell>
@@ -87,12 +87,14 @@ export default function StaffingRequestsPage() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Create Staffing Request</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
+          <TextField label="Title" value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <TextField label="Role ID" type="number" value={form.role_id}
             onChange={(e) => setForm({ ...form, role_id: Number(e.target.value) })} />
           <TextField label="Location ID" type="number" value={form.location_id}
             onChange={(e) => setForm({ ...form, location_id: Number(e.target.value) })} />
-          <TextField label="Headcount" type="number" value={form.headcount}
-            onChange={(e) => setForm({ ...form, headcount: Number(e.target.value) })} />
+          <TextField label="Number of Positions" type="number" value={form.number_of_positions}
+            onChange={(e) => setForm({ ...form, number_of_positions: Number(e.target.value) })} />
           <TextField select label="Priority" value={form.priority}
             onChange={(e) => setForm({ ...form, priority: e.target.value })}>
             <MenuItem value="low">Low</MenuItem>

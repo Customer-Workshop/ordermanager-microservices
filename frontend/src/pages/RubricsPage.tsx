@@ -123,9 +123,11 @@ export default function RubricsPage() {
         <DialogTitle>Rubric Preview (Interviewer View)</DialogTitle>
         <DialogContent>
           {previewHtml && (
-            <Box
-              sx={{ border: '1px solid #eee', borderRadius: 1, p: 2, bgcolor: '#fff' }}
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
+            <iframe
+              srcDoc={previewHtml}
+              sandbox="allow-same-origin"
+              style={{ width: '100%', height: '70vh', border: '1px solid #eee', borderRadius: 4, background: '#fff' }}
+              title="Rubric Preview"
             />
           )}
         </DialogContent>

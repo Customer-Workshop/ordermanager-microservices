@@ -55,9 +55,9 @@ export default function CandidatesPage() {
                 ) : (
                   candidates.map((c) => (
                     <TableRow key={c.id} hover>
-                      <TableCell sx={{ fontWeight: 500 }}>{c.full_name}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>{c.first_name} {c.last_name}</TableCell>
                       <TableCell>{c.email}</TableCell>
-                      <TableCell>{c.experience_years} years</TableCell>
+                      <TableCell>{c.years_of_experience} years</TableCell>
                       <TableCell>
                         <Chip label={c.status} size="small" color={STATUS_COLORS[c.status] || 'default'} />
                       </TableCell>

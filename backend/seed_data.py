@@ -2,7 +2,7 @@
 from app.database import SessionLocal, engine, Base
 from app.models.location import Location
 from app.models.practice_unit import PracticeUnit
-from app.models.user import User, UserPersona
+from app.models.user import User, UserPersona, PersonaType
 from app.core.security import get_password_hash
 
 # Import all models so tables are created
@@ -15,11 +15,11 @@ def seed():
 
     # --- Locations (3 company + 2 client) ---
     locations = [
-        {"city": "Richardson", "state": "TX", "zip_code": "75080", "is_client_location": False},
-        {"city": "Raleigh", "state": "NC", "zip_code": "27601", "is_client_location": False},
-        {"city": "Phoenix", "state": "AZ", "zip_code": "85001", "is_client_location": False},
-        {"city": "Plano", "state": "TX", "zip_code": "75024", "is_client_location": True},
-        {"city": "Reston", "state": "VA", "zip_code": "20190", "is_client_location": True},
+        {"name": "Richardson Office", "city": "Richardson", "state": "TX", "location_type": "company"},
+        {"name": "Raleigh Office", "city": "Raleigh", "state": "NC", "location_type": "company"},
+        {"name": "Phoenix Office", "city": "Phoenix", "state": "AZ", "location_type": "company"},
+        {"name": "Plano Client Site", "city": "Plano", "state": "TX", "location_type": "client"},
+        {"name": "Reston Client Site", "city": "Reston", "state": "VA", "location_type": "client"},
     ]
     for loc_data in locations:
         existing = db.query(Location).filter(Location.city == loc_data["city"], Location.state == loc_data["state"]).first()
@@ -42,20 +42,22 @@ def seed():
 
     # --- Sample Users ---
     users = [
-        {"email": "admin@infosys.com", "full_name": "Portal Admin", "persona": UserPersona.ADMIN, "password": "admin123"},
-        {"email": "recruiter@infosys.com", "full_name": "Sample Recruiter", "persona": UserPersona.RECRUITER, "password": "recruiter123"},
-        {"email": "interviewer@infosys.com", "full_name": "Sample Interviewer", "persona": UserPersona.INTERVIEWER, "password": "interviewer123"},
-        {"email": "anchor@infosys.com", "full_name": "Unit Anchor", "persona": UserPersona.UNIT_ANCHOR, "password": "anchor123"},
+        {"email": "admin@infosys.com", "full_name": "Portal Admin", "persona": PersonaType.ADMIN, "password": "admin123"},
+        {"email": "recruiter@infosys.com", "full_name": "Sample Recruiter", "persona": PersonaType.RECRUITER, "password": "recruiter123"},
+        {"email": "interviewer@infosys.com", "full_name": "Sample Interviewer", "persona": PersonaType.INTERVIEWER, "password": "interviewer123"},
+        {"email": "anchor@infosys.com", "full_name": "Unit Anchor", "persona": PersonaType.STAFFING_MANAGER, "password": "anchor123"},
     ]
     for user_data in users:
         existing = db.query(User).filter(User.email == user_data["email"]).first()
         if not existing:
-            db.add(User(
+            user = User(
                 email=user_data["email"],
                 full_name=user_data["full_name"],
-                persona=user_data["persona"],
                 hashed_password=get_password_hash(user_data["password"]),
-            ))
+            )
+            db.add(user)
+            db.flush()
+            db.add(UserPersona(user_id=user.id, persona=user_data["persona"], is_primary=True))
 
     db.commit()
     db.close()

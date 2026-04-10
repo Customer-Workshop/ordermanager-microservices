@@ -35,7 +35,10 @@ def get_rubric_html(rubric_id: int, db: Session = Depends(get_db)):
     if rubric.html_content is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No HTML content for this rubric")
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(content=rubric.html_content)
+    return HTMLResponse(
+        content=rubric.html_content,
+        headers={"Content-Security-Policy": "script-src 'none'; object-src 'none'"},
+    )
 
 
 @router.post("/", response_model=RoleRubricResponse, status_code=status.HTTP_201_CREATED)
