@@ -6,12 +6,12 @@ import {
 import { Upload } from '@mui/icons-material';
 
 const DEMO_SLAS = [
-  { id: 1, name: 'Onboarding Timeline', target: '30 days from offer', status: 'on_track', type: 'Onboarding' },
-  { id: 2, name: 'Candidate Quality Score', target: '≥ 85% rubric pass rate', status: 'on_track', type: 'Quality' },
-  { id: 3, name: 'Retention Rate (6-month)', target: '≥ 95%', status: 'at_risk', type: 'Retention' },
-  { id: 4, name: 'Time-to-Fill', target: '≤ 45 days', status: 'on_track', type: 'Staffing' },
-  { id: 5, name: 'Interview-to-Offer Ratio', target: '≤ 3:1', status: 'on_track', type: 'Efficiency' },
-  { id: 6, name: 'Hybrid Compliance', target: '100% agreement within 7 days', status: 'on_track', type: 'Compliance' },
+  { id: 1, name: 'Candidate Quality Score', target: '≥ 85% rubric pass rate', status: 'on_track', type: 'Quality' },
+  { id: 2, name: 'Retention Rate (6-month)', target: '≥ 95%', status: 'at_risk', type: 'Retention' },
+  { id: 3, name: 'Time-to-Fill', target: '≤ 21 days', status: 'on_track', type: 'Staffing' },
+  { id: 4, name: 'Interview-to-Offer Ratio', target: '≤ 3:1', status: 'on_track', type: 'Efficiency' },
+  { id: 5, name: 'Hybrid Compliance', target: '100% agreement within 7 days', status: 'on_track', type: 'Compliance' },
+  { id: 6, name: 'Candidate Identification Effectiveness', target: '≥ 95% selected from up to 4 candidates per Position Requisition', status: 'on_track', type: 'Quality' },
 ];
 
 const STATUS_MAP: Record<string, { label: string; bg: string; color: string }> = {
