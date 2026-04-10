@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  passwordHash    String
+  name            String
+  title           String?
+  phone           String?
+  linkedIn        String?
+  headshotUrl     String?
+  role            String   @default("AUDIENCE")
+  notifFrequency  String   @default("DAILY")
+  notifMechanism  String   @default("EMAIL")
+  preferredTypes  String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organizedEvents   Event[]           @relation("EventOrganizer")
+  proposedEvents    Event[]           @relation("EventSpeaker")
+  registrations     Registration[]
+  groupMemberships  GroupMembership[]
+  accessGrants      AccessGrant[]
+  auditLogs         AuditLog[]
+  campaigns         Campaign[]
+  notifications     Notification[]
+}
+
+model OrgGroup {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  type        String
+  parentId    String?
+  parent      OrgGroup?  @relation("GroupHierarchy", fields: [parentId], references: [id])
+  children    OrgGroup[] @relation("GroupHierarchy")
+  createdAt   DateTime   @default(now())
+
+  events      EventGroup[]
+  members     GroupMembership[]
+  accessGrants AccessGrant[]
+}
+
+model GroupMembership {
+  id        String   @id @default(uuid())
+  userId    String
+  groupId   String
+  role      String   @default("MEMBER")
+  user      User     @relation(fields: [userId], references: [id])
+  group     OrgGroup @relation(fields: [groupId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, groupId])
+}
+
+model AccessGrant {
+  id        String   @id @default(uuid())
+  userId    String
+  groupId   String
+  role      String
+  user      User     @relation(fields: [userId], references: [id])
+  group     OrgGroup @relation(fields: [groupId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, groupId, role])
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  eventType     String
+  status        String   @default("PROPOSED")
+  startDate     DateTime
+  endDate       DateTime
+  venue         String?
+  bridgeLink    String?
+  organizerId   String?
+  speakerId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  organizer     User?          @relation("EventOrganizer", fields: [organizerId], references: [id])
+  speaker       User           @relation("EventSpeaker", fields: [speakerId], references: [id])
+  sessions      Session[]
+  groups        EventGroup[]
+  registrations Registration[]
+  campaigns     Campaign[]
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  eventId       String
+  topic         String
+  topicBrief    String
+  startTime     DateTime
+  endTime       DateTime
+  speakerName   String
+  speakerTitle  String?
+  speakerLinkedIn String?
+  speakerHeadshot String?
+  sortOrder     Int      @default(0)
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model EventGroup {
+  id       String   @id @default(uuid())
+  eventId  String
+  groupId  String
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  group    OrgGroup @relation(fields: [groupId], references: [id])
+
+  @@unique([eventId, groupId])
+}
+
+model Registration {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  status    String   @default("REGISTERED")
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  eventId     String
+  createdById String
+  channel     String
+  targetGroup String
+  message     String
+  scheduledAt DateTime
+  status      String   @default("SCHEDULED")
+  sentAt      DateTime?
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model AppConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  resource  String
+  details   String?
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
