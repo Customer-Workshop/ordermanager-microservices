@@ -87,7 +87,7 @@ export class ProductListComponent implements OnInit {
 
   filterProducts(event: Event) {
     const term = (event.target as HTMLInputElement).value.toLowerCase();
-    this.filteredProducts = this.products.filter(p => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+    this.filteredProducts = this.products.filter(p => p.name?.toLowerCase().includes(term) || p.sku?.toLowerCase().includes(term) || p.category?.toLowerCase().includes(term));
   }
 
   createProduct() {
@@ -100,7 +100,7 @@ export class ProductListComponent implements OnInit {
   }
 
   getAvgPrice(): number { return this.products.length ? this.products.reduce((s, p) => s + p.price, 0) / this.products.length : 0; }
-  getCategories(): string[] { return [...new Set(this.products.map(p => p.category))] as string[]; }
+  getCategories(): string[] { return [...new Set(this.products.map(p => p.category).filter(Boolean))] as string[]; }
   getTotalValue(): number { return this.products.reduce((s, p) => s + (p.price * (p.inventory?.quantityOnHand || 0)), 0); }
   getStockBadge(p: any): string { const q = p.inventory?.quantityOnHand ?? 0; return q === 0 ? 'badge-danger' : q <= 20 ? 'badge-warning' : 'badge-success'; }
   getStockLabel(p: any): string { const q = p.inventory?.quantityOnHand ?? 0; return q === 0 ? 'Out of Stock' : q <= 20 ? 'Low Stock' : 'In Stock'; }

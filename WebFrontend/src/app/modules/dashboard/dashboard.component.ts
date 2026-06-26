@@ -76,7 +76,7 @@ export class DashboardComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>('/api/orders').subscribe(data => { this.stats.orders = data.length; this.recentOrders = data.slice(0, 5); });
+    this.http.get<any[]>('/api/orders').subscribe(data => { this.stats.orders = data.length; this.recentOrders = data.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()).slice(0, 5); });
     this.http.get<any[]>('/api/products').subscribe(data => this.stats.products = data.length);
     this.http.get<any[]>('/api/customers').subscribe(data => { this.stats.customers = data.length; data.forEach(c => this.customerMap[c.id] = c.name); });
     this.http.get<any[]>('/api/inventory').subscribe(data => { this.inventoryItems = data; this.stats.lowStock = data.filter((i: any) => i.quantityOnHand <= i.reorderLevel).length; });
