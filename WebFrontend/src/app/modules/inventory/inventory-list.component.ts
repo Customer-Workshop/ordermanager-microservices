@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
     <div class="page-container">
       <div class="page-header"><h2>Inventory</h2><p>Monitor stock levels and warehouse locations</p></div>
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon purple">&#128230;</div><div class="stat-label">Tracked Items</div><div class="stat-value">{{ items.length }}</div></div>
-        <div class="stat-card"><div class="stat-icon green">&#128200;</div><div class="stat-label">Total Units</div><div class="stat-value">{{ getTotalUnits() }}</div></div>
-        <div class="stat-card"><div class="stat-icon yellow">&#9888;&#65039;</div><div class="stat-label">Low Stock</div><div class="stat-value">{{ getLowStockCount() }}</div></div>
-        <div class="stat-card"><div class="stat-icon red">&#127970;</div><div class="stat-label">Warehouses</div><div class="stat-value">{{ getLocations().length }}</div></div>
+        <div class="stat-card"><div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><div class="stat-label">Tracked Items</div><div class="stat-value">{{ items.length }}</div></div>
+        <div class="stat-card"><div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="stat-label">Total Units</div><div class="stat-value">{{ getTotalUnits() }}</div></div>
+        <div class="stat-card"><div class="stat-icon yellow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-label">Low Stock</div><div class="stat-value">{{ getLowStockCount() }}</div></div>
+        <div class="stat-card"><div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div class="stat-label">Warehouses</div><div class="stat-value">{{ getLocations().length }}</div></div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -47,7 +47,7 @@ import { FormsModule } from '@angular/forms';
           </tbody>
         </table>
         <div *ngIf="!getFilteredItems().length" class="empty-state">
-          <div class="empty-icon">&#128230;</div><h3>No items match the filter</h3><p>Try selecting a different filter option.</p>
+          <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div><h3>No items match the filter</h3><p>Try selecting a different filter option.</p>
         </div>
       </div>
     </div>

@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
     <div class="page-container">
       <div class="page-header"><h2>Products</h2><p>Manage your product catalog</p></div>
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon purple">&#128722;</div><div class="stat-label">Total Products</div><div class="stat-value">{{ products.length }}</div></div>
-        <div class="stat-card"><div class="stat-icon green">&#128181;</div><div class="stat-label">Avg. Price</div><div class="stat-value">{{ getAvgPrice() | currency }}</div></div>
-        <div class="stat-card"><div class="stat-icon yellow">&#128193;</div><div class="stat-label">Categories</div><div class="stat-value">{{ getCategories().length }}</div></div>
-        <div class="stat-card"><div class="stat-icon red">&#128200;</div><div class="stat-label">Total Value</div><div class="stat-value">{{ getTotalValue() | currency }}</div></div>
+        <div class="stat-card"><div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="stat-label">Total Products</div><div class="stat-value">{{ products.length }}</div></div>
+        <div class="stat-card"><div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="stat-label">Avg. Price</div><div class="stat-value">{{ getAvgPrice() | currency }}</div></div>
+        <div class="stat-card"><div class="stat-icon yellow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="stat-label">Categories</div><div class="stat-value">{{ getCategories().length }}</div></div>
+        <div class="stat-card"><div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="stat-label">Total Value</div><div class="stat-value">{{ getTotalValue() | currency }}</div></div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -38,7 +38,7 @@ import { FormsModule } from '@angular/forms';
           </tbody>
         </table>
         <div *ngIf="!filteredProducts.length" class="empty-state">
-          <div class="empty-icon">&#128722;</div><h3>No products found</h3><p>Add your first product to get started.</p>
+          <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><h3>No products found</h3><p>Add your first product to get started.</p>
         </div>
       </div>
     </div>

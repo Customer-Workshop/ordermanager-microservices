@@ -14,10 +14,10 @@ import { RouterLink } from '@angular/router';
         <p>Overview of your order management system</p>
       </div>
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon purple">&#128230;</div><div class="stat-label">Total Orders</div><div class="stat-value">{{ stats.orders }}</div></div>
-        <div class="stat-card"><div class="stat-icon green">&#128722;</div><div class="stat-label">Products</div><div class="stat-value">{{ stats.products }}</div></div>
-        <div class="stat-card"><div class="stat-icon yellow">&#128101;</div><div class="stat-label">Customers</div><div class="stat-value">{{ stats.customers }}</div></div>
-        <div class="stat-card"><div class="stat-icon red">&#9888;&#65039;</div><div class="stat-label">Low Stock Items</div><div class="stat-value">{{ stats.lowStock }}</div></div>
+        <div class="stat-card"><div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="stat-label">Total Orders</div><div class="stat-value">{{ stats.orders }}</div></div>
+        <div class="stat-card"><div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="stat-label">Products</div><div class="stat-value">{{ stats.products }}</div></div>
+        <div class="stat-card"><div class="stat-icon yellow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-label">Customers</div><div class="stat-value">{{ stats.customers }}</div></div>
+        <div class="stat-card"><div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-label">Low Stock Items</div><div class="stat-value">{{ stats.lowStock }}</div></div>
       </div>
       <div class="dashboard-grid">
         <div class="card">
@@ -36,7 +36,7 @@ import { RouterLink } from '@angular/router';
             </table>
           </div>
           <div *ngIf="recentOrders.length === 0" class="empty-state">
-            <div class="empty-icon">&#128203;</div><h3>No orders yet</h3><p>Orders placed through the system will appear here.</p>
+            <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No orders yet</h3><p>Orders placed through the system will appear here.</p>
           </div>
         </div>
         <div class="card">

@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
     <div class="page-container">
       <div class="page-header"><h2>Orders</h2><p>Track and manage customer orders</p></div>
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-icon purple">&#128203;</div><div class="stat-label">Total Orders</div><div class="stat-value">{{ orders.length }}</div></div>
-        <div class="stat-card"><div class="stat-icon green">&#9989;</div><div class="stat-label">Completed</div><div class="stat-value">{{ getByStatus('completed') }}</div></div>
-        <div class="stat-card"><div class="stat-icon yellow">&#9200;</div><div class="stat-label">Pending</div><div class="stat-value">{{ getByStatus('pending') }}</div></div>
-        <div class="stat-card"><div class="stat-icon red">&#128176;</div><div class="stat-label">Total Revenue</div><div class="stat-value">{{ getTotalRevenue() | currency }}</div></div>
+        <div class="stat-card"><div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="stat-label">Total Orders</div><div class="stat-value">{{ orders.length }}</div></div>
+        <div class="stat-card"><div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="stat-label">Completed</div><div class="stat-value">{{ getByStatus('completed') }}</div></div>
+        <div class="stat-card"><div class="stat-icon yellow"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="stat-label">Pending</div><div class="stat-value">{{ getByStatus('pending') }}</div></div>
+        <div class="stat-card"><div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="stat-label">Total Revenue</div><div class="stat-value">{{ getTotalRevenue() | currency }}</div></div>
       </div>
       <div class="card">
         <div class="card-header">
@@ -45,7 +45,7 @@ import { FormsModule } from '@angular/forms';
           </tbody>
         </table>
         <div *ngIf="!filteredOrders.length" class="empty-state">
-          <div class="empty-icon">&#128203;</div><h3>No orders yet</h3><p>Create your first order to get started.</p>
+          <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>No orders yet</h3><p>Create your first order to get started.</p>
         </div>
       </div>
     </div>
