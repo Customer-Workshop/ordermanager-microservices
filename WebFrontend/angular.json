@@ -14,7 +14,18 @@
             "outputPath": "dist/client-app",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "polyfills": ["zone.js"],
+            "styles": ["src/styles.css"],
             "tsConfig": "tsconfig.app.json"
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "client-app:build",
+            "proxyConfig": "proxy.conf.json",
+            "port": 4200,
+            "host": "0.0.0.0"
           }
         }
       }

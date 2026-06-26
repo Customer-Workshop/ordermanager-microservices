@@ -1,25 +1,109 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
-    <h2>Customers</h2>
-    <table *ngIf="customers.length">
-      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th></tr></thead>
-      <tbody>
-        <tr *ngFor="let c of customers">
-          <td>{{c.name}}</td><td>{{c.email}}</td><td>{{c.phone}}</td><td>{{c.city}}, {{c.state}}</td>
-        </tr>
-      </tbody>
-    </table>
-  `
+    <div class="page-container">
+      <div class="page-header"><h2>Customers</h2><p>Manage your customer directory</p></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-icon purple">&#128101;</div><div class="stat-label">Total Customers</div><div class="stat-value">{{ customers.length }}</div></div>
+        <div class="stat-card"><div class="stat-icon green">&#127961;</div><div class="stat-label">Cities</div><div class="stat-value">{{ getCities().length }}</div></div>
+        <div class="stat-card"><div class="stat-icon yellow">&#127758;</div><div class="stat-label">States</div><div class="stat-value">{{ getStates().length }}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>All Customers</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="search-input" placeholder="Search customers..." (input)="filterCustomers($event)">
+            <button class="btn btn-primary" (click)="showCreate = true">+ New Customer</button>
+          </div>
+        </div>
+        <table *ngIf="filteredCustomers.length">
+          <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Location</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of filteredCustomers">
+              <td><div style="display:flex;align-items:center;gap:10px"><div class="customer-avatar">{{ getInitials(c.name) }}</div><span class="font-medium">{{ c.name }}</span></div></td>
+              <td><span class="text-gray">{{ c.email }}</span></td>
+              <td class="font-mono">{{ c.phone }}</td>
+              <td><span class="font-medium">{{ c.city }}, {{ c.state }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="!filteredCustomers.length" class="empty-state">
+          <div class="empty-icon">&#128101;</div><h3>No customers found</h3><p>Add your first customer to get started.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Customer Modal -->
+    <div class="modal-backdrop" *ngIf="showCreate" (click)="showCreate = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header"><h3>New Customer</h3><button class="modal-close" (click)="showCreate = false">&times;</button></div>
+        <div class="modal-body">
+          <div class="form-group"><label>Company Name</label><input class="form-control" [(ngModel)]="newCustomer.name" placeholder="e.g. Acme Corp"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Email</label><input class="form-control" type="email" [(ngModel)]="newCustomer.email" placeholder="orders@acme.com"></div>
+            <div class="form-group"><label>Phone</label><input class="form-control" [(ngModel)]="newCustomer.phone" placeholder="555-0100"></div>
+          </div>
+          <div class="form-group"><label>Address</label><input class="form-control" [(ngModel)]="newCustomer.address" placeholder="123 Main St"></div>
+          <div class="form-row">
+            <div class="form-group"><label>City</label><input class="form-control" [(ngModel)]="newCustomer.city" placeholder="Springfield"></div>
+            <div class="form-group"><label>State</label><input class="form-control" [(ngModel)]="newCustomer.state" placeholder="IL"></div>
+          </div>
+          <div class="form-group"><label>Zip Code</label><input class="form-control" [(ngModel)]="newCustomer.zipCode" placeholder="62701"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="showCreate = false">Cancel</button>
+          <button class="btn btn-primary" (click)="createCustomer()" [disabled]="saving">{{ saving ? 'Saving...' : 'Create Customer' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast toast-success" *ngIf="toast">{{ toast }}</div>
+    <div class="toast toast-error" *ngIf="error">{{ error }}</div>
+  `,
+  styles: [`.customer-avatar { width: 36px; height: 36px; border-radius: 9999px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }`]
 })
 export class CustomerListComponent implements OnInit {
   customers: any[] = [];
+  filteredCustomers: any[] = [];
+  showCreate = false;
+  saving = false;
+  toast = '';
+  error = '';
+  newCustomer = { name: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '' };
+
   constructor(private http: HttpClient) {}
-  ngOnInit() { this.http.get<any[]>('/api/customers').subscribe(data => this.customers = data); }
+
+  ngOnInit() { this.loadCustomers(); }
+
+  loadCustomers() {
+    this.http.get<any[]>('/api/customers').subscribe(data => { this.customers = data; this.filteredCustomers = data; });
+  }
+
+  filterCustomers(event: Event) {
+    const term = (event.target as HTMLInputElement).value.toLowerCase();
+    this.filteredCustomers = this.customers.filter(c => c.name.toLowerCase().includes(term) || c.email.toLowerCase().includes(term) || c.city?.toLowerCase().includes(term));
+  }
+
+  createCustomer() {
+    if (!this.newCustomer.name || !this.newCustomer.email) { this.showError('Name and Email are required'); return; }
+    this.saving = true;
+    this.http.post('/api/customers', this.newCustomer).subscribe({
+      next: () => { this.showCreate = false; this.saving = false; this.newCustomer = { name: '', email: '', phone: '', address: '', city: '', state: '', zipCode: '' }; this.loadCustomers(); this.showToast('Customer created successfully'); },
+      error: (err) => { this.saving = false; this.showError(err.error?.title || 'Failed to create customer'); }
+    });
+  }
+
+  getInitials(name: string): string { return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase(); }
+  getCities(): string[] { return [...new Set(this.customers.map(c => c.city).filter(Boolean))] as string[]; }
+  getStates(): string[] { return [...new Set(this.customers.map(c => c.state).filter(Boolean))] as string[]; }
+
+  showToast(msg: string) { this.toast = msg; setTimeout(() => this.toast = '', 3000); }
+  showError(msg: string) { this.error = msg; setTimeout(() => this.error = '', 4000); }
 }
