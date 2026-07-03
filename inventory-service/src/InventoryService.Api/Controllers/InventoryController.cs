@@ -31,6 +31,10 @@ public class InventoryController : ControllerBase
         {
             return Ok(await _inventoryManager.RestockAsync(productId, request.Quantity));
         }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
         catch (ArgumentException ex)
         {
             return NotFound(new { error = ex.Message });
@@ -43,6 +47,10 @@ public class InventoryController : ControllerBase
         try
         {
             return Ok(await _inventoryManager.DeductAsync(productId, request.Quantity));
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return BadRequest(new { error = ex.Message });
         }
         catch (ArgumentException ex)
         {

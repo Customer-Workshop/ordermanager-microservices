@@ -73,6 +73,26 @@ public class InventoryManagerTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => manager.DeductAsync(1, 99999));
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public async Task Restock_ThrowsOnNonPositiveQuantity(int quantity)
+    {
+        using var context = CreateContext();
+        var manager = new InventoryManager(context);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => manager.RestockAsync(1, quantity));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public async Task Deduct_ThrowsOnNonPositiveQuantity(int quantity)
+    {
+        using var context = CreateContext();
+        var manager = new InventoryManager(context);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => manager.DeductAsync(1, quantity));
+    }
+
     [Fact]
     public async Task GetLowStockItems_ReturnsItemsAtOrBelowReorderLevel()
     {
