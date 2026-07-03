@@ -6,3 +6,5 @@ wwwroot/
 *.db
 .vs/
 .angular/
+*.db-shm
+*.db-wal
