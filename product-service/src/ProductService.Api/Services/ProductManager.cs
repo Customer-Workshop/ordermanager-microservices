@@ -45,6 +45,9 @@ public class ProductManager
         if (await _context.Products.AnyAsync(p => p.Sku == product.Sku))
             throw new InvalidOperationException($"A product with SKU {product.Sku} already exists.");
 
+        if (product.CreatedAt == default)
+            product.CreatedAt = DateTime.UtcNow;
+
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
         return product;
