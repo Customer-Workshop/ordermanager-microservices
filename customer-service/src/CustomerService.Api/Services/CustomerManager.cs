@@ -32,6 +32,8 @@ public class CustomerManager
         if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
             throw new InvalidOperationException($"A customer with email {customer.Email} already exists.");
 
+        if (customer.CreatedAt == default) customer.CreatedAt = DateTime.UtcNow;
+
         _context.Customers.Add(customer);
         await _context.SaveChangesAsync();
         return customer;
